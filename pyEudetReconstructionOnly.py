@@ -158,26 +158,32 @@ histo_maprepeats.Draw()
 histo_maprepeats.SaveAs("%s/Run%i/PixelMapRepeats_run%06i.root"%(PlotPath,RunNumber,RunNumber))
 
 
-# Find Hot Pixels
-histo_nhits,histo_hit,histo_hot,histo_freq = aDataSet.FindHotPixel(0.01,n_proc)
+# Load or find hot pixels
+hotpixel_threshold = 0.01
+hotpixel_filename = "%s/Run%i/HotPixels_%i_%0.2f_-1.txt" %(PlotPath,RunNumber,RunNumber,hotpixel_threshold)
+print "Hotpixel filename:", hotpixel_filename
+if os.path.isfile(hotpixel_filename):
+    aDataSet.LoadHotPixel(hotpixel_filename)
+else:
+    histo_nhits,histo_hit,histo_hot,histo_freq = aDataSet.FindHotPixel(RunNumber,hotpixel_threshold,n_proc,hotpixel_filename)
 
-cannhits = TCanvas()
-histo_nhits.Draw()
-cannhits.SaveAs("%s/Run%i/NHit_pixels_run%06i.root"%(PlotPath,RunNumber,RunNumber))
+    cannhits = TCanvas()
+    histo_nhits.Draw()
+    cannhits.SaveAs("%s/Run%i/NHit_pixels_run%06i.root"%(PlotPath,RunNumber,RunNumber))
 
-canhit = TCanvas()
-histo_hit.Draw("colz")
-canhit.SaveAs("%s/Run%i/Hit_pixels_run%06i.root"%(PlotPath,RunNumber,RunNumber))
+    canhit = TCanvas()
+    histo_hit.Draw("colz")
+    canhit.SaveAs("%s/Run%i/Hit_pixels_run%06i.root"%(PlotPath,RunNumber,RunNumber))
 
-canhot = TCanvas()
-histo_hot.Draw("colz")
-canhot.SaveAs("%s/Run%i/Hot_pixels_run%06i.root"%(PlotPath,RunNumber,RunNumber))
+    canhot = TCanvas()
+    histo_hot.Draw("colz")
+    canhot.SaveAs("%s/Run%i/Hot_pixels_run%06i.root"%(PlotPath,RunNumber,RunNumber))
 
-canfreq = TCanvas()
-canfreq.SetLogx()
-canfreq.SetLogy()
-histo_freq.Draw("")
-canfreq.SaveAs("%s/Run%i/Firing_frequency_run%06i.root"%(PlotPath,RunNumber,RunNumber))
+    canfreq = TCanvas()
+    canfreq.SetLogx()
+    canfreq.SetLogy()
+    histo_freq.Draw("")
+    canfreq.SaveAs("%s/Run%i/Firing_frequency_run%06i.root"%(PlotPath,RunNumber,RunNumber))
 
 
 n_matched = 0
