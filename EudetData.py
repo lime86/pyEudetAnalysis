@@ -159,7 +159,7 @@ class EudetData:
 
 
 
-    def FindHotPixel(self,run,threshold,Nevents=-1,filename="hotpixels.txt"):
+    def FindHotPixel(self,threshold,Nevents=-1,filename="hotpixels.txt"):
 
         # will calculate the frequency with which each pixel fires
         # threshold (0 -> 1) defines hot pixel cut

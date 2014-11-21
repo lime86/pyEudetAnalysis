@@ -165,7 +165,7 @@ print "Hotpixel filename:", hotpixel_filename
 if os.path.isfile(hotpixel_filename):
     aDataSet.LoadHotPixel(hotpixel_filename)
 else:
-    histo_nhits,histo_hit,histo_hot,histo_freq = aDataSet.FindHotPixel(RunNumber,hotpixel_threshold,n_proc,hotpixel_filename)
+    histo_nhits,histo_hit,histo_hot,histo_freq = aDataSet.FindHotPixel(hotpixel_threshold,n_proc,hotpixel_filename)
 
     cannhits = TCanvas()
     histo_nhits.Draw()
