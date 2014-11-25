@@ -169,10 +169,10 @@ class EudetData:
         prev_pixel_xhits = []
         unique_events = 0
 
-        histo_nhits = TH1D("nhit","N Pixel Fires",40,0,39)
-        histo_hitpixel = TH2D("hit","Hit Pixel Map",256,0,255,256,0,255)
+        histo_nhits = TH1D("nhit","N Pixel Fires",40,0,40)
+        histo_hitpixel = TH2D("hit","Hit Pixel Map",256,0,256,256,0,256)
         histo_frequency = TH1D("freq","Pixel Firing Frequency",10000,0,1)
-        histo_hotpixel = TH2D("hot","Hot Pixel Map",256,0,255,256,0,255)
+        histo_hotpixel = TH2D("hot","Hot Pixel Map",256,0,256,256,0,256)
 
         if Nevents>self.p_nEntries or Nevents==-1:
             n_max = self.p_nEntries
