@@ -939,7 +939,7 @@ SquareCanvas(can40)
 can40.SaveAs("%s/Run%i/%s/TOTProfile.pdf"%(PlotPath,RunNumber,method_name))
 
 # Write all histograms to output root file
-out = TFile("%s/Run%i/%s/output_rootfile_%s.root"%(PlotPath,RunNumber,method_name, method_name), "recreate")
+out = TFile("%s/Run%i/%s/output_rootfile.root"%(PlotPath,RunNumber,method_name), "recreate")
 out.cd()
 
 h_chi2.Write()
