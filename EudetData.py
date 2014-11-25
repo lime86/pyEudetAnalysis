@@ -14,6 +14,7 @@ from Constant import *
 from ToolBox import *
 from PersistentList import *
 from itertools import product
+import os, ast
 
 import future_builtins #Timepix3/CLICpix analysis
 SensorType=future_builtins.SensorType  #Timepix3/CLICpix analysis
@@ -166,19 +167,20 @@ class EudetData:
 
 
 
-    def FindHotPixel(self,threshold,Nevents=-1):
+    def FindHotPixel(self,threshold,Nevents=-1,filename="hotpixels.txt"):
 
         # will calculate the frequency with which each pixel fires
         # threshold (0 -> 1) defines hot pixel cut
+        # saves hot pixels to text file
 
         n_max = 0
         prev_pixel_xhits = []
         unique_events = 0
 
-        histo_nhits = TH1D("nhit","N Pixel Fires",40,0,39)
-        histo_hitpixel = TH2D("hit","Hit Pixel Map",256,0,255,256,0,255)
+        histo_nhits = TH1D("nhit","N Pixel Fires",40,0,40)
+        histo_hitpixel = TH2D("hit","Hit Pixel Map",256,0,256,256,0,256)
         histo_frequency = TH1D("freq","Pixel Firing Frequency",10000,0,1)
-        histo_hotpixel = TH2D("hot","Hot Pixel Map",256,0,255,256,0,255)
+        histo_hotpixel = TH2D("hot","Hot Pixel Map",256,0,256,256,0,256)
 
         if Nevents>self.p_nEntries or Nevents==-1:
             n_max = self.p_nEntries
@@ -236,11 +238,29 @@ class EudetData:
                     histo_hotpixel.Fill(i,j,self.frequency_map[i][j]) 
                     self.hotpixels.append([i,j])
 
+        f = open(filename,'w')
+        f.write("%s" %self.hotpixels)
+        f.close()
+
         print "##### Hot Pixel Report #####"
         print " %i Hot pixel found at  : "%(len(self.hotpixels))
         print self.hotpixels
         print "############################"
         return histo_nhits,histo_hitpixel,histo_hotpixel,histo_frequency
+
+
+    def LoadHotPixel(self,filename):
+        # to load the hot pixels recorded in a text file
+
+        f = open(filename,'r')
+        hotpixels_as_str = f.readline()
+        self.hotpixels = ast.literal_eval(hotpixels_as_str)
+        f.close()
+
+        print "##### Hot Pixels set from file #####"
+        print " %i Hot pixel set  : "%(len(self.hotpixels))
+        print self.hotpixels
+        print "####################################"
 
 
     def getEvent(self,i):
