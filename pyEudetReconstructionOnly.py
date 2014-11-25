@@ -34,6 +34,10 @@ parser.add_option("-e", "--edge",
 parser.add_option("-s", "--sensor",
                   help="Sensor type : Timepix, Timepix3 or CLICpix", dest="SENSOR", default="Timepix")
 
+parser.add_option("-i", "--dut ID",
+                  help="DUT ID", dest="DUTID", default="6")
+
+
 (options, args) = parser.parse_args()
 
 
@@ -95,6 +99,11 @@ else :
     print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
     parser.print_help()
     exit()
+
+if(options.DUTID) :
+    dutID = int(options.DUTID)
+else :
+    dutID=6
     
     
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
@@ -118,8 +127,13 @@ alignment_constants = ReadAlignment(AlignementPath)
 gStyle.SetOptStat("nemruoi")
 gStyle.SetOptFit(1111)
 
+tbtrackname=""
+if ("Timepix" in options.SENSOR):
+    tbtrackname="_timepix3"
+elif ("CLICpix" in options.SENSOR):
+     tbtrackname="_clicpix"
 
-aDataSet = EudetData("%s/tbtrackrun%06i.root"%(input_folder,RunNumber),50000.0,edge_width,1,"tbtrack")
+aDataSet = EudetData("%s/tbtrackrun%06i%s.root"%(input_folder,RunNumber, tbtrackname),50000.0,edge_width,1,"tbtrack")
 
 
 # Computing Chi2 cut and plotting Chi2 distribution
@@ -195,7 +209,7 @@ for i in range(0,n_proc) :
     for k in xrange(npixels_hit):
         pixel_x_hits.append(aDataSet.p_col[k])
 
-    if (pixel_x_hits == prev_pixel_xhits):
+    if (pixel_x_hits == prev_pixel_xhits and len(pixel_x_hits)!=0):
         # same pixel map as before, will add clusters already computed
         aDataSet.AllClusters.append(clusters_tmp)
     else:
@@ -208,10 +222,10 @@ for i in range(0,n_proc) :
     aDataSet.GetTrack(i)
 
     for alignement in alignment_constants :
-        ApplyAlignment_at_event(i,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]])
+        ApplyAlignment_at_event(i,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]], dutID)
 
-    aDataSet.FindMatchedCluster(i,0.1,6,distances_histo)
-    m,me=aDataSet.ComputeResiduals(i)
+    aDataSet.FindMatchedCluster(i,0.1,dutID,distances_histo)
+    m,me=aDataSet.ComputeResiduals(i, dutID)
     n_matched+=m
     n_matched_edge+=me
     if i%1000 ==0 :

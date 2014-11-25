@@ -717,7 +717,7 @@ def TotalSigmaFunctionX(sigmaCharge_tmp_X,sigmaCharge_tmp_Y,dataSet,skip,dut=6):
                     aCluster = dataSet.AllClusters[j][track.cluster]
                     if(aCluster.sizeX==2 and aCluster.sizeY==1) :
                         aCluster.GetEtaCorrectedQWeightedCentroid(fabs(sigmaCharge_tmp_X),fabs(sigmaCharge_tmp_Y))
-                        dataSet.ComputeResiduals(j)
+                        dataSet.ComputeResiduals(j, dut)
                         tmpx.Fill(aCluster.resX)
 
 #     for i in range(dataSet.p_nEntries) :
@@ -772,7 +772,7 @@ def TotalSigmaFunctionY(sigmaCharge_tmp_Y,sigmaCharge_tmp_X,dataSet,skip,dut=6):
                     aCluster = dataSet.AllClusters[j][track.cluster]
                     if(aCluster.sizeY==2 and aCluster.sizeX==1) :
                         aCluster.GetEtaCorrectedQWeightedCentroid(fabs(sigmaCharge_tmp_X),fabs(sigmaCharge_tmp_Y))
-                        dataSet.ComputeResiduals(j)
+                        dataSet.ComputeResiduals(j, dut)
                         tmpy.Fill(aCluster.resY)
 
 #     for i in range(dataSet.p_nEntries) :
@@ -902,43 +902,43 @@ def PerformAlignement(aDataSet, boundary) :
     return res.x[0:3],res.x[3:]
 
 
-def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alignment.txt',gtol=1e-5,Rotations=[0,0,0]) :
+def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alignment.txt',gtol=1e-5,Rotations=[0,0,0], dut=6) :
     x_tx = np.array([0.])
     x_ty = np.array([0.])
     xr= np.array(Rotations)
 
     x_txang = [0.]
-    argTuple = [0.,0.],[0.,0.],aDataSet,nevent,skip,cut
+    argTuple = [0.,0.],[0.,0.],aDataSet,nevent,skip,cut,dut
     resrx = minimize(TotalRotationFunctionZ,x_txang,argTuple,method='Nelder-Mead',options={'xtol': 1e-6,'disp': True})
     rZ = resrx.x[0]
     print "Starting guess Z angle : %f"%rZ
       
     xr= np.array([0,0,rZ])
     
-    argTuple = [x_tx,x_ty],aDataSet,nevent,skip,cut        
+    argTuple = [x_tx,x_ty],aDataSet,nevent,skip,cut,dut        
     resr = minimize(TotalRotationFunction,xr,argTuple,method='BFGS',options={'disp': True,'gtol': gtol , 'eps':0.5, 'maxiter' : 15 })
     print "resr", resr
     print "best guess for rotation matrix: resr.x", resr.x
     if resr.success == False:
         print "Minimisation didn't converge. Press any key to continue, ctrl D to exit"
-        b=raw_input()
+        #b=raw_input()
 
 
-    argTuple = resr.x,aDataSet,nevent,skip,cut  
+    argTuple = resr.x,aDataSet,nevent,skip,cut,dut  
     rest = minimize(TotalMeanFunctionX,x_tx, argTuple,method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
     print "rest", rest
     print "best guess for x translation: rest.x", rest.x
     if rest.success == False:
         print "Minimisation didn't converge. Press any key to continue, ctrl D to exit"
-        b=raw_input() 
+        #b=raw_input() 
 
-    argTuple = rest.x[0],resr.x,aDataSet,nevent,skip,cut
+    argTuple = rest.x[0],resr.x,aDataSet,nevent,skip,cut,dut
     rest2= minimize(TotalMeanFunctionY,x_ty, argTuple,method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
     print "rest2", rest2
     print "best guess for y translation: rest2.x", rest2.x
     if rest2.success == False:
         print "Minimisation didn't converge. Press any key to continue, ctrl D to exit"
-        b=raw_input() 
+        #b=raw_input() 
 
     f = open(filename,'a')
     f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(resr.x[0],resr.x[1],resr.x[2],rest.x[0],rest2.x[0]))
@@ -971,7 +971,7 @@ def Perform2StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
 #param 2: number of events we are running on
 #param 3: number of skiped events
 #
-def FindSigmaMin(dataSet,nevent,skip=1) :
+def FindSigmaMin(dataSet,nevent,skip=1, dut=6) :
     
     bestsigma=1000
     bestres=1000
@@ -979,8 +979,8 @@ def FindSigmaMin(dataSet,nevent,skip=1) :
     for sigmaint in range(sigmaint_max) :
     	sigma=sigmaint*1e-4
         
-    	resX=TotalSigmaFunctionX(sigma,sigma,dataSet,skip)
-    	resY=TotalSigmaFunctionY(sigma,sigma,dataSet,skip)
+    	resX=TotalSigmaFunctionX(sigma,sigma,dataSet,skip, dut)
+    	resY=TotalSigmaFunctionY(sigma,sigma,dataSet,skip, dut)
 	res=resX/2.0+resY/2.0
 	
 	if (res < bestres) : 
@@ -989,7 +989,7 @@ def FindSigmaMin(dataSet,nevent,skip=1) :
             if sigmaint == (sigmaint_max-1):
                 print "WARNING sigma optimisation hit limit. Adjust limit."
                 print "Press any key to continue, ctrl+D to exit"
-                blah = raw_input()
+                #blah = raw_input()
 
     print "Best sigma found: %f um, giving resolution: %f um" %(bestsigma*1000,bestres*1000)
     return bestsigma,bestsigma
@@ -1112,9 +1112,9 @@ def EdgeEfficiency(aDataSet,dut) :
 
 
 
-def ComputeEfficiency(aDataSet,n_matched,n_matched_edge,edge,PlotPath):
-    n_tracks_in_total = ComputeDetectorAcceptance(aDataSet,6,edge)
-    n_tracks_in_main = ComputeDetectorAcceptance(aDataSet,6,0)
+def ComputeEfficiency(aDataSet,n_matched,n_matched_edge,edge,PlotPath, dut=6):
+    n_tracks_in_total = ComputeDetectorAcceptance(aDataSet,dut,edge)
+    n_tracks_in_main = ComputeDetectorAcceptance(aDataSet, dut,0)
     n_tracks_in_edge = n_tracks_in_total - n_tracks_in_main
 
     print "n_tracks_in_total", n_tracks_in_total

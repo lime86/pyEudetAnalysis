@@ -110,8 +110,10 @@ class EudetData:
         print "Opening %s"%filename
         if(self.mode=="tbtrack"):
             print "Reading in tbtrack mode"
-            self.TrackTree = self.tbtrack_file.Get("eutracks")
-            self.pixelTree = self.tbtrack_file.Get("zspix")
+            #self.TrackTree = self.tbtrack_file.Get("eutracks")
+            #self.pixelTree = self.tbtrack_file.Get("zspix")
+            self.TrackTree = self.tbtrack_file.Get("tracks")#nalipour                                                          
+            self.pixelTree = self.tbtrack_file.Get("rawdata")#nalipour
             self.p_nEntries = self.pixelTree.GetEntries()
             self.t_nEntries = self.TrackTree.GetEntries()
         elif(self.mode=="pyEudetNTuple") :
@@ -265,8 +267,11 @@ class EudetData:
         self.p_iden= self.pixelTree.iden
         self.p_euEv = self.pixelTree.euEvt
 
+
  #       for index,totvalue in enumerate(self.p_tot) :
  #           self.p_tot[index]=float(totvalue)/self.scale
+
+
  
  
     def PlotFrame(self,i,plot,n_pix_min=1) : 
@@ -280,7 +285,7 @@ class EudetData:
 	
 	    plot.Draw("colz")
 	    print "press enter for next frame"
-	    a=raw_input()
+	    #a=raw_input()
 	else : 
 	    print "Skipping event %i, empty"%i
 
@@ -544,7 +549,7 @@ class EudetData:
                     if cluster.id == track.cluster  :
                         cluster.GetResiduals(track.trackX[track.iden.index(dut)],track.trackY[track.iden.index(dut)])
 
-                        if(self.IsInEdges(track)):
+                        if(self.IsInEdges(track, dut)):
                             nmatch_in_edge += 1.
                         else :
                             nmatch_in_main += 1.
@@ -834,6 +839,31 @@ class EudetData:
         col_tmp = [s for s in self.p_col]
         tot_tmp = [s for s in self.p_tot]
 
+
+        # nalipour: remove pixels which were hit multiple times
+        indexPixelsToRemove=[]
+        for index in range(0, len(row_tmp)):
+            row_temp=row_tmp[index]
+            col_temp=col_tmp[index]            
+            for index2 in range(index+1, len(row_tmp)):
+                if(row_temp==row_tmp[index2] and col_temp==col_tmp[index2]):
+                    indexPixelsToRemove.append(index)
+                    indexPixelsToRemove.append(index2)
+                    #print "YES"
+
+        # print "=========================="
+        # for k in indexPixelsToRemove:
+        #     print "---"
+        #     print "row=", row_tmp[k]
+        #     print "col=", col_tmp[k]
+        #     print "tot=", tot_tmp[k]
+
+        row_tmp=[ row_tmp[k] for k in range(0, len(row_tmp)) if k not in indexPixelsToRemove ]
+        col_tmp=[ col_tmp[k] for k in range(0, len(col_tmp)) if k not in indexPixelsToRemove ]   
+        tot_tmp=[ tot_tmp[k] for k in range(0, len(tot_tmp)) if k not in indexPixelsToRemove ]
+        
+        #end nalipour
+
         # remove hot pixels
         hpindex = 0
         if len(self.hotpixels)>0:
@@ -860,6 +890,30 @@ class EudetData:
             cluster.Statistics()	
 	
         clusters = [cluster for cluster in clusters if cluster.totalTOT>0]
+
+
+        # #nalipour check if duplicate pixels (same pixel fired two times with different TOTs)
+        # for cluster in clusters:
+        #     indexPixelsToRemove=[]
+        #     for i in range (0, len(cluster.row)):
+        #         x_firedPixel=cluster.row[i]
+        #         y_firedPixel=cluster.col[i]
+        #         tot_firedPixel=cluster.tot[i]
+                
+        #         Repetitive=false
+        #         for j in range (i+1, len(cluster.row)):
+        #             if(cluster.row[j] == x_firedPixel and cluster.col[j] == y_firedPixel):
+        #                 print "Yes"
+        #                 indexPixelsToRemove.append(i)
+        #                 indexPixelsToRemove.append(j)
+                        
+        #     cluster.row=[ cluster.row[k] for k in range(0, len(cluster.row)) if k not in indexPixelsToRemove ]
+        #     cluster.col=[ cluster.col[k] for k in range(0, len(cluster.col)) if k not in indexPixelsToRemove ]
+        #     cluster.tot=[ cluster.tot[k] for k in range(0, len(cluster.tot)) if k not in indexPixelsToRemove ]
+            
+        #   #End nalipour
+
+
 
         clusterid = 0
 
