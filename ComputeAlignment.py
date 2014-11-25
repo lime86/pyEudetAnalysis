@@ -139,21 +139,14 @@ dot = AlignmentPath.rfind('.')
 AlignmentPath = AlignmentPath[:dot] + '_run%i_%s_%i_%i' %(RunNumber, method_name, int(options.NEVENT), skip) + AlignmentPath[dot:]
 print "Alignment path will be", AlignmentPath
 
-histo_nhits,histo_hit,histo_hot,histo_freq = aDataSet.FindHotPixel(0.01,n_proc)
 
-cannhits = TCanvas()
-histo_nhits.Draw()
-
-canhit = TCanvas()
-histo_hit.Draw("colz")
-
-canhot = TCanvas()
-histo_hot.Draw("colz")
-
-canfreq = TCanvas()
-canfreq.SetLogx()
-canfreq.SetLogy()
-histo_freq.Draw("")
+# Load hot pixels
+hotpixel_filename = "%s/Run%i/HotPixels_%i_0.01.txt" %(PlotPath,RunNumber,RunNumber)
+print "Hotpixel filename:", hotpixel_filename
+if os.path.isfile(hotpixel_filename):
+    aDataSet.LoadHotPixel(hotpixel_filename)
+else:
+    print "WARNING no hot pixel file found. No hot pixels set"
 
 
 prev_pixel_xhits = []
@@ -315,10 +308,6 @@ resY2hit = resY2hit_hist.GetListOfFunctions()[0].GetParameter(2)
 # Write all histograms to output root file
 out = TFile("%s/Run%i/%s/alignment_rootfile.root"%(PlotPath,RunNumber,method_name), "recreate")
 out.cd()
-histo_nhits.Write()
-histo_hit.Write()
-histo_hot.Write()
-histo_freq.Write()
 tccorx1.Write()
 tccory1.Write()
 tccorx2.Write()
