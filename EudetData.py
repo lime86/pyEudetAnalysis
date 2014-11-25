@@ -14,6 +14,9 @@ from Constant import *
 from ToolBox import *
 from PersistentList import *
 from itertools import product
+
+import future_builtins #Timepix3/CLICpix analysis
+SensorType=future_builtins.SensorType  #Timepix3/CLICpix analysis
 ###############################################################################################################################
 #
 #        A container for TBTrack Data: contains all the informations about tracks and cluster from data
@@ -110,10 +113,13 @@ class EudetData:
         print "Opening %s"%filename
         if(self.mode=="tbtrack"):
             print "Reading in tbtrack mode"
-            #self.TrackTree = self.tbtrack_file.Get("eutracks")
-            #self.pixelTree = self.tbtrack_file.Get("zspix")
-            self.TrackTree = self.tbtrack_file.Get("tracks")#nalipour                                                          
-            self.pixelTree = self.tbtrack_file.Get("rawdata")#nalipour
+            if (SensorType=="Timepix3" or SensorType=="CLICpix"):
+                self.TrackTree = self.tbtrack_file.Get("tracks")
+                self.pixelTree = self.tbtrack_file.Get("rawdata")
+            else:
+                self.TrackTree = self.tbtrack_file.Get("eutracks")
+                self.pixelTree = self.tbtrack_file.Get("zspix")
+
             self.p_nEntries = self.pixelTree.GetEntries()
             self.t_nEntries = self.TrackTree.GetEntries()
         elif(self.mode=="pyEudetNTuple") :
@@ -840,30 +846,23 @@ class EudetData:
         col_tmp = [s for s in self.p_col]
         tot_tmp = [s for s in self.p_tot]
 
+        # ------------------------------------------------------------------------------------#
+        # Temporary solution for pixels hit several times. Include TOA in the future analysis
+        # ------------------------------------------------------------------------------------#
+        if (SensorType=="Timepix3" or SensorType=="CLICpix"):
+            indexPixelsToRemove=[]
+            for index in range(0, len(row_tmp)):
+                row_temp=row_tmp[index]
+                col_temp=col_tmp[index]            
+                for index2 in range(index+1, len(row_tmp)):
+                    if(row_temp==row_tmp[index2] and col_temp==col_tmp[index2]):
+                        indexPixelsToRemove.append(index)
+                        indexPixelsToRemove.append(index2)
 
-        # nalipour: remove pixels which were hit multiple times
-        indexPixelsToRemove=[]
-        for index in range(0, len(row_tmp)):
-            row_temp=row_tmp[index]
-            col_temp=col_tmp[index]            
-            for index2 in range(index+1, len(row_tmp)):
-                if(row_temp==row_tmp[index2] and col_temp==col_tmp[index2]):
-                    indexPixelsToRemove.append(index)
-                    indexPixelsToRemove.append(index2)
-                    #print "YES"
-
-        # print "=========================="
-        # for k in indexPixelsToRemove:
-        #     print "---"
-        #     print "row=", row_tmp[k]
-        #     print "col=", col_tmp[k]
-        #     print "tot=", tot_tmp[k]
-
-        row_tmp=[ row_tmp[k] for k in range(0, len(row_tmp)) if k not in indexPixelsToRemove ]
-        col_tmp=[ col_tmp[k] for k in range(0, len(col_tmp)) if k not in indexPixelsToRemove ]   
-        tot_tmp=[ tot_tmp[k] for k in range(0, len(tot_tmp)) if k not in indexPixelsToRemove ]
-        
-        #end nalipour
+            row_tmp=[ row_tmp[k] for k in range(0, len(row_tmp)) if k not in indexPixelsToRemove ]
+            col_tmp=[ col_tmp[k] for k in range(0, len(col_tmp)) if k not in indexPixelsToRemove ]   
+            tot_tmp=[ tot_tmp[k] for k in range(0, len(tot_tmp)) if k not in indexPixelsToRemove ]
+        # ------------------------------------------------------------------------------------#
 
         # remove hot pixels
         hpindex = 0
@@ -891,31 +890,6 @@ class EudetData:
             cluster.Statistics()	
 	
         clusters = [cluster for cluster in clusters if cluster.totalTOT>0]
-
-
-        # #nalipour check if duplicate pixels (same pixel fired two times with different TOTs)
-        # for cluster in clusters:
-        #     indexPixelsToRemove=[]
-        #     for i in range (0, len(cluster.row)):
-        #         x_firedPixel=cluster.row[i]
-        #         y_firedPixel=cluster.col[i]
-        #         tot_firedPixel=cluster.tot[i]
-                
-        #         Repetitive=false
-        #         for j in range (i+1, len(cluster.row)):
-        #             if(cluster.row[j] == x_firedPixel and cluster.col[j] == y_firedPixel):
-        #                 print "Yes"
-        #                 indexPixelsToRemove.append(i)
-        #                 indexPixelsToRemove.append(j)
-                        
-        #     cluster.row=[ cluster.row[k] for k in range(0, len(cluster.row)) if k not in indexPixelsToRemove ]
-        #     cluster.col=[ cluster.col[k] for k in range(0, len(cluster.col)) if k not in indexPixelsToRemove ]
-        #     cluster.tot=[ cluster.tot[k] for k in range(0, len(cluster.tot)) if k not in indexPixelsToRemove ]
-            
-        #   #End nalipour
-
-
-
         clusterid = 0
 
         for cluster in clusters :

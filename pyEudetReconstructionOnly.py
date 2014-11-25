@@ -127,13 +127,7 @@ alignment_constants = ReadAlignment(AlignementPath)
 gStyle.SetOptStat("nemruoi")
 gStyle.SetOptFit(1111)
 
-tbtrackname=""
-if ("Timepix" in options.SENSOR):
-    tbtrackname="_timepix3"
-elif ("CLICpix" in options.SENSOR):
-     tbtrackname="_clicpix"
-
-aDataSet = EudetData("%s/tbtrackrun%06i%s.root"%(input_folder,RunNumber, tbtrackname),50000.0,edge_width,1,"tbtrack")
+aDataSet = EudetData("%s/tbtrackrun%06i.root"%(input_folder,RunNumber),50000.0,edge_width,1,"tbtrack")
 
 
 # Computing Chi2 cut and plotting Chi2 distribution
@@ -246,4 +240,4 @@ root_file = "%s/Run%i/%s/pyEudetNtuple_run%i_%s.root"%(PlotPath,RunNumber,method
 os.system("rm %s"%root_file)
 
 print "Writing reconstructed data to %s"%root_file
-aDataSet.WriteReconstructedData(root_file,6)
+aDataSet.WriteReconstructedData(root_file, dutID)

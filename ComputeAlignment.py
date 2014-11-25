@@ -120,14 +120,8 @@ from array import array
 gStyle.SetOptStat("nemruoi")
 gStyle.SetOptFit(1111)
 
-tbtrackname=""
-if ("Timepix" in options.SENSOR):
-    tbtrackname="_timepix3"
-elif ("CLICpix" in options.SENSOR):
-     tbtrackname="_clicpix"
 
-
-aDataSet = EudetData("%s/tbtrackrun%06i%s.root"%(input_folder,RunNumber, tbtrackname),50000.0,edge_width,1,RunNumber,"tbtrack")
+aDataSet = EudetData("%s/tbtrackrun%06i.root"%(input_folder,RunNumber),50000.0,edge_width,1,RunNumber,"tbtrack")
 
 
 
@@ -148,7 +142,7 @@ else:
 print "Running on run %i, with method %s, on %i events with skip %i" %(RunNumber,method_name,n_proc,skip)
 
 dot = AlignmentPath.rfind('.')
-AlignmentPath = AlignmentPath[:dot] + '_run%i_%s_%i_%i%s' %(RunNumber, method_name, int(options.NEVENT), skip, tbtrackname) + AlignmentPath[dot:]
+AlignmentPath = AlignmentPath[:dot] + '_run%i_%s_%i_%i' %(RunNumber, method_name, int(options.NEVENT), skip) + AlignmentPath[dot:]
 print "Alignment path will be", AlignmentPath
 
 histo_nhits,histo_hit,histo_hot,histo_freq = aDataSet.FindHotPixel(0.01,n_proc)
@@ -325,7 +319,7 @@ c_resY2hit.Update()
 resY2hit = resY2hit_hist.GetListOfFunctions()[0].GetParameter(2)
 
 # Write all histograms to output root file
-out = TFile("%s/Run%i/%s/alignment_rootfile%s.root"%(PlotPath,RunNumber,method_name,tbtrackname), "recreate")
+out = TFile("%s/Run%i/%s/alignment_rootfile.root"%(PlotPath,RunNumber,method_name), "recreate")
 out.cd()
 histo_nhits.Write()
 histo_hit.Write()
