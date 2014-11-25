@@ -15,15 +15,14 @@ from ToolBox import *
 from PersistentList import *
 from itertools import product
 import os, ast
-
-
-import future_builtins #Timepix3/CLICpix analysis
-SensorType=future_builtins.SensorType  #Timepix3/CLICpix analysis
 ###############################################################################################################################
 #
 #        A container for TBTrack Data: contains all the informations about tracks and cluster from data
 #
 ###############################################################################################################################
+import future_builtins #Timepix3/CLICpix analysis
+SensorType=future_builtins.SensorType  #Timepix3/CLICpix analysis
+
 
 class EudetData:
     """A container for TBTrack Data """
