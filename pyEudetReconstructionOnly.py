@@ -179,11 +179,11 @@ n_matched = 0
 n_matched_edge = 0
 last_time = time.time()
 distances_histo = TH1F("distances_histo","",100,0.0,1.0)
-prev_pixel_xhits = [999, 999]
+prev_pixel_xhits = [999, 999] # This initialisation prevents a break down when the first event is an empty frame (for Timepix1 (256x256), Timepix3 (256x256) and CLICpix (64x64) this value can never happen).
 
 for i in range(0,n_proc) :
     aDataSet.getEvent(i)
-    
+
     # is this a new pixel map?
     npixels_hit = len(aDataSet.p_col)
     pixel_x_hits = []

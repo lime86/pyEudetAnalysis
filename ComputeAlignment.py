@@ -154,7 +154,7 @@ else:
     print "WARNING no hot pixel file found. No hot pixels set"
 
 
-prev_pixel_xhits = []
+prev_pixel_xhits = [999, 999]
 last_time=time.time()
 
 clusters_tmp = []

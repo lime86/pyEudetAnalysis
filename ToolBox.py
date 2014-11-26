@@ -1200,7 +1200,7 @@ def CountPixelMapRepeats(dataSet,n_proc):
 
     histo_mapreps = TH1F("histo_mapreps","",20,0.5,20.5)
     histo_mapreps.GetXaxis().SetTitle("Number of repeated pixel maps")
-    prev_pixel_xhits = []
+    prev_pixel_xhits = [999, 999]
     nrepeats = 1
 
     for i in range(0,n_proc) :

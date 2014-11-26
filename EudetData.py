@@ -174,7 +174,7 @@ class EudetData:
         # saves hot pixels to text file
 
         n_max = 0
-        prev_pixel_xhits = []
+        prev_pixel_xhits = [999, 999]
         unique_events = 0
 
         histo_nhits = TH1D("nhit","N Pixel Fires",40,0,40)
