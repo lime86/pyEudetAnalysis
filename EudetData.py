@@ -293,11 +293,8 @@ class EudetData:
         self.p_iden= self.pixelTree.iden
         self.p_euEv = self.pixelTree.euEvt
 
-
  #       for index,totvalue in enumerate(self.p_tot) :
  #           self.p_tot[index]=float(totvalue)/self.scale
-
-
  
  
     def PlotFrame(self,i,c,n_pix_min=0) : 

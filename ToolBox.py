@@ -319,25 +319,25 @@ def HitProbCorrelationY(dataSet,nbin,dut=6):
 #param 3: position of the device under test in the list of planes
 #
 def TrackHitProb(dataSet,nbin,dut=6):
-    HitProb_1_track = TH2D("HitProb_1_track_nbin%i"%nbin,"Hit probability, cluster size 1",nbin,0.,pitchX,nbin,0.,pitchX)
+    HitProb_1_track = TH2D("HitProb_1_track_nbin%i"%nbin,"Hit probability, cluster size 1",nbin,0.,pitchX,nbin,0.,pitchY)
     #HitProb_1_track.GetXaxis().SetRangeUser(0.,0.055)
     HitProb_1_track.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #HitProb_1_track.GetYaxis().SetRangeUser(0.,0.055)
     HitProb_1_track.GetYaxis().SetTitle("Track Y position within pixel [mm]")
 
-    HitProb_2_track = TH2D("HitProb_2_track_nbin%i"%nbin,"Hit probability, cluster size 2",nbin,0.,pitchX,nbin,0.,pitchX)
+    HitProb_2_track = TH2D("HitProb_2_track_nbin%i"%nbin,"Hit probability, cluster size 2",nbin,0.,pitchX,nbin,0.,pitchY)
     #HitProb_2_track.GetXaxis().SetRangeUser(0.,0.055)
     HitProb_2_track.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #HitProb_2_track.GetYaxis().SetRangeUser(0.,0.055)
     HitProb_2_track.GetYaxis().SetTitle("Track Y position within pixel [mm]")
 
-    HitProb_3_track = TH2D("HitProb_3_track_nbin%i"%nbin,"Hit probability, cluster size 3",nbin,0.,pitchX,nbin,0.,pitchX)
+    HitProb_3_track = TH2D("HitProb_3_track_nbin%i"%nbin,"Hit probability, cluster size 3",nbin,0.,pitchX,nbin,0.,pitchY)
     #HitProb_3_track.GetXaxis().SetRangeUser(0.,0.055)
     HitProb_3_track.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #HitProb_3_track.GetYaxis().SetRangeUser(0.,0.055)
     HitProb_3_track.GetYaxis().SetTitle("Track Y position within pixel [mm]")
 
-    HitProb_4_track = TH2D("HitProb_4_track_nbin%i"%nbin,"Hit probability, cluster size 4",nbin,0.,pitchX,nbin,0.,pitchX)
+    HitProb_4_track = TH2D("HitProb_4_track_nbin%i"%nbin,"Hit probability, cluster size 4",nbin,0.,pitchX,nbin,0.,pitchY)
     #HitProb_4_track.GetXaxis().SetRangeUser(0.,0.055)
     HitProb_4_track.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #HitProb_4_track.GetYaxis().SetRangeUser(0.,0.055)
@@ -388,44 +388,44 @@ def TOTProfile(dataSet,nbin,dut=6):
   
  
     
-    TOTProfileY_1 = TH2D("TOTProfileY_1_nbin%i"%nbin,"Hit probability, cluster size 1",nbin,0.,pitchX,1000,0.,1000)
+    TOTProfileY_1 = TH2D("TOTProfileY_1_nbin%i"%nbin,"Hit probability, cluster size 1",nbin,0.,pitchY,1000,0.,1000)
     #TOTProfileY_1.GetXaxis().SetRangeUser(0.,0.055)
     TOTProfileY_1.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #TOTProfileY_1.GetYaxis().SetRangeUser(0.,0.055)
     TOTProfileY_1.GetYaxis().SetTitle("TOT (A.U.)]")
 
-    TOTProfileY_2 = TH2D("TOTProfileY_2_nbin%i"%nbin,"Hit probability, cluster size 2",nbin,0.,pitchX,1000,0.,1000)
+    TOTProfileY_2 = TH2D("TOTProfileY_2_nbin%i"%nbin,"Hit probability, cluster size 2",nbin,0.,pitchY,1000,0.,1000)
     #TOTProfileY_2.GetXaxis().SetRangeUser(0.,0.055)
     TOTProfileY_2.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #TOTProfileY_2.GetYaxis().SetRangeUser(0.,0.055)
     TOTProfileY_2.GetYaxis().SetTitle("TOT (A.U.)]")
 
-    TOTProfileY_3 = TH2D("TOTProfileY_3_nbin%i"%nbin,"Hit probability, cluster size 3",nbin,0.,pitchX,1000,0.,1000)
+    TOTProfileY_3 = TH2D("TOTProfileY_3_nbin%i"%nbin,"Hit probability, cluster size 3",nbin,0.,pitchY,1000,0.,1000)
     #TOTProfileY_3.GetXaxis().SetRangeUser(0.,0.055)
     TOTProfileY_3.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #TOTProfileY_3.GetYaxis().SetRangeUser(0.,0.055)
     TOTProfileY_3.GetYaxis().SetTitle("TOT (A.U.)]")
 
-    TOTProfileY_4 = TH2D("TOTProfileY_4_nbin%i"%nbin,"Hit probability, cluster size 4",nbin,0.,pitchX,1000,0.,1000)
+    TOTProfileY_4 = TH2D("TOTProfileY_4_nbin%i"%nbin,"Hit probability, cluster size 4",nbin,0.,pitchY,1000,0.,1000)
     #TOTProfileY_4.GetXaxis().SetRangeUser(0.,0.055)
     TOTProfileY_4.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #TOTProfileY_4.GetYaxis().SetRangeUser(0.,0.055)
     TOTProfileY_4.GetYaxis().SetTitle("TOT (A.U.)]")
     
-    TOTProfileX = TH2D("TOTProfileX_nbin%i"%nbin,"Hit probability, cluster size 4",nbin,0.,pitchX,1000,0.,2000)
+    TOTProfileX = TH2D("TOTProfileX_nbin%i"%nbin,"Hit probability, cluster size 4",nbin,0.,pitchY,1000,0.,2000)
     #TOTProfileY_4.GetXaxis().SetRangeUser(0.,0.055)
     TOTProfileX.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #TOTProfileY_4.GetYaxis().SetRangeUser(0.,0.055)
     TOTProfileX.GetYaxis().SetTitle("TOT (A.U.)]")  
     
-    TOTProfileY = TH2D("TOTProfileY_nbin%i"%nbin,"Hit probability, cluster size 4",nbin,0.,pitchX,1000,0.,2000)
+    TOTProfileY = TH2D("TOTProfileY_nbin%i"%nbin,"Hit probability, cluster size 4",nbin,0.,pitchY,1000,0.,2000)
     #TOTProfileY_4.GetXaxis().SetRangeUser(0.,0.055)
     TOTProfileY.GetXaxis().SetTitle("Track X position within pixel [mm]")
     #TOTProfileY_4.GetYaxis().SetRangeUser(0.,0.055)
     TOTProfileY.GetYaxis().SetTitle("TOT (A.U.)]")     
     
-    TOTProfile= TH2D("TOTProfile","2D TOT Profile",nbin,0.,pitchX,nbin,0.,pitchX)
-    TOTProfileN= TH2D("TOTProfileN","2D TOT Profile N",nbin,0.,pitchX,nbin,0.,pitchX)  
+    TOTProfile= TH2D("TOTProfile","2D TOT Profile",nbin,0.,pitchX,nbin,0.,pitchY)
+    TOTProfileN= TH2D("TOTProfileN","2D TOT Profile N",nbin,0.,pitchX,nbin,0.,pitchY)  
     last_time = time.time()
     
     
