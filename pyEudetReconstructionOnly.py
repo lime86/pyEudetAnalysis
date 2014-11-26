@@ -137,13 +137,13 @@ can_chi2 = TCanvas()
 h_chi2.Draw("")
 can_chi2.SetLogx()
 can_chi2.SetLogy()
-can_chi2.SaveAs("%s/Run%i/Chi2_run%06i.root"%(PlotPath,RunNumber,RunNumber))
+can_chi2.SaveAs("%s/Run%i/Chi2_run%06i.pdf"%(PlotPath,RunNumber,RunNumber))
 
 can_chi2ndof = TCanvas()
 h_chi2ndof.Draw("")
 can_chi2ndof.SetLogx()
 can_chi2ndof.SetLogy()
-can_chi2ndof.SaveAs("%s/Run%i/Chi2ndof_run%06i.root"%(PlotPath,RunNumber,RunNumber))
+can_chi2ndof.SaveAs("%s/Run%i/Chi2ndof_run%06i.pdf"%(PlotPath,RunNumber,RunNumber))
 
 if(options.NEVENT):
     n_proc= int(options.NEVENT)
@@ -163,7 +163,7 @@ print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n
 histo_maprepeats = CountPixelMapRepeats(aDataSet,n_proc)
 canreps = TCanvas()
 histo_maprepeats.Draw()
-histo_maprepeats.SaveAs("%s/Run%i/PixelMapRepeats_run%06i.root"%(PlotPath,RunNumber,RunNumber))
+canreps.SaveAs("%s/Run%i/PixelMapRepeats_run%06i.pdf"%(PlotPath,RunNumber,RunNumber))
 
 
 # Load hot pixels
@@ -223,8 +223,16 @@ distances_histo.GetXaxis().SetTitle("Track-cluster distance (mm)")
 distances_histo.Draw()
 candist.SaveAs("%s/Run%i/%s/Cluster-track_dist.pdf"%(PlotPath,RunNumber,method_name))
 
+# Write all histograms to output root file
+out = TFile("%s/Run%i/ReconstructionPlots_%i_%s_%i.root" %(PlotPath,RunNumber,RunNumber,method_name,int(options.NEVENT)), "recreate")
+h_chi2.Write()
+h_chi2ndof.Write()
+histo_maprepeats.Write()
+distances_histo.Write()
+out.Close()
+
+# Write reconstructed data to output root file
 root_file = "%s/Run%i/%s/pyEudetNtuple_run%i_%s.root"%(PlotPath,RunNumber,method_name,RunNumber,method_name)
 os.system("rm %s"%root_file)
-
 print "Writing reconstructed data to %s"%root_file
 aDataSet.WriteReconstructedData(root_file, dutID)
