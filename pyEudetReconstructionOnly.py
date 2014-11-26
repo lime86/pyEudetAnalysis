@@ -34,6 +34,10 @@ parser.add_option("-e", "--edge",
 parser.add_option("-s", "--sensor",
                   help="Sensor type : Timepix, Timepix3 or CLICpix", dest="SENSOR", default="Timepix")
 
+parser.add_option("-i", "--dut ID",
+                  help="DUT ID", dest="DUTID", type="int", default=6)
+
+
 (options, args) = parser.parse_args()
 
 
@@ -95,6 +99,11 @@ else :
     print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
     parser.print_help()
     exit()
+
+if(options.DUTID) :
+    dutID = int(options.DUTID)
+else :
+    dutID=6
     
     
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
@@ -117,7 +126,6 @@ alignment_constants = ReadAlignment(AlignementPath)
 
 gStyle.SetOptStat("nemruoi")
 gStyle.SetOptFit(1111)
-
 
 aDataSet = EudetData("%s/tbtrackrun%06i.root"%(input_folder,RunNumber),50000.0,edge_width,1,"tbtrack")
 
@@ -171,7 +179,7 @@ n_matched = 0
 n_matched_edge = 0
 last_time = time.time()
 distances_histo = TH1F("distances_histo","",100,0.0,1.0)
-prev_pixel_xhits = []
+prev_pixel_xhits = [999, 999] # This initialisation prevents a break down when the first event is an empty frame (for Timepix1 (256x256), Timepix3 (256x256) and CLICpix (64x64) this value can never happen).
 
 for i in range(0,n_proc) :
     aDataSet.getEvent(i)
@@ -195,10 +203,10 @@ for i in range(0,n_proc) :
     aDataSet.GetTrack(i)
 
     for alignement in alignment_constants :
-        ApplyAlignment_at_event(i,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]])
+        ApplyAlignment_at_event(i,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]], dutID)
 
-    aDataSet.FindMatchedCluster(i,0.1,6,distances_histo)
-    m,me=aDataSet.ComputeResiduals(i)
+    aDataSet.FindMatchedCluster(i,0.1,dutID,distances_histo)
+    m,me=aDataSet.ComputeResiduals(i, dutID)
     n_matched+=m
     n_matched_edge+=me
     if i%1000 ==0 :
@@ -219,4 +227,4 @@ root_file = "%s/Run%i/%s/pyEudetNtuple_run%i_%s.root"%(PlotPath,RunNumber,method
 os.system("rm %s"%root_file)
 
 print "Writing reconstructed data to %s"%root_file
-aDataSet.WriteReconstructedData(root_file,6)
+aDataSet.WriteReconstructedData(root_file, dutID)

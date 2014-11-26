@@ -20,6 +20,9 @@ import os, ast
 #        A container for TBTrack Data: contains all the informations about tracks and cluster from data
 #
 ###############################################################################################################################
+import future_builtins #Timepix3/CLICpix analysis
+SensorType=future_builtins.SensorType  #Timepix3/CLICpix analysis
+
 
 class EudetData:
     """A container for TBTrack Data """
@@ -111,8 +114,13 @@ class EudetData:
         print "Opening %s"%filename
         if(self.mode=="tbtrack"):
             print "Reading in tbtrack mode"
-            self.TrackTree = self.tbtrack_file.Get("eutracks")
-            self.pixelTree = self.tbtrack_file.Get("zspix")
+            if (SensorType=="Timepix3" or SensorType=="CLICpix"):
+                self.TrackTree = self.tbtrack_file.Get("tracks")
+                self.pixelTree = self.tbtrack_file.Get("rawdata")
+            else:
+                self.TrackTree = self.tbtrack_file.Get("eutracks")
+                self.pixelTree = self.tbtrack_file.Get("zspix")
+
             self.p_nEntries = self.pixelTree.GetEntries()
             self.t_nEntries = self.TrackTree.GetEntries()
         elif(self.mode=="pyEudetNTuple") :
@@ -166,7 +174,7 @@ class EudetData:
         # saves hot pixels to text file
 
         n_max = 0
-        prev_pixel_xhits = []
+        prev_pixel_xhits = [999, 999]
         unique_events = 0
 
         histo_nhits = TH1D("nhit","N Pixel Fires",40,0,40)
@@ -565,7 +573,7 @@ class EudetData:
                     if cluster.id == track.cluster  :
                         cluster.GetResiduals(track.trackX[track.iden.index(dut)],track.trackY[track.iden.index(dut)])
 
-                        if(self.IsInEdges(track)):
+                        if(self.IsInEdges(track, dut)):
                             nmatch_in_edge += 1.
                         else :
                             nmatch_in_main += 1.
@@ -855,6 +863,24 @@ class EudetData:
         col_tmp = [s for s in self.p_col]
         tot_tmp = [s for s in self.p_tot]
 
+        # ------------------------------------------------------------------------------------#
+        # Temporary solution for pixels hit several times. Include TOA in the future analysis
+        # ------------------------------------------------------------------------------------#
+        if (SensorType=="Timepix3" or SensorType=="CLICpix"):
+            indexPixelsToRemove=[]
+            for index in range(0, len(row_tmp)):
+                row_temp=row_tmp[index]
+                col_temp=col_tmp[index]            
+                for index2 in range(index+1, len(row_tmp)):
+                    if(row_temp==row_tmp[index2] and col_temp==col_tmp[index2]):
+                        indexPixelsToRemove.append(index)
+                        indexPixelsToRemove.append(index2)
+
+            row_tmp=[ row_tmp[k] for k in range(0, len(row_tmp)) if k not in indexPixelsToRemove ]
+            col_tmp=[ col_tmp[k] for k in range(0, len(col_tmp)) if k not in indexPixelsToRemove ]   
+            tot_tmp=[ tot_tmp[k] for k in range(0, len(tot_tmp)) if k not in indexPixelsToRemove ]
+        # ------------------------------------------------------------------------------------#
+
         # remove hot pixels
         hpindex = 0
         if len(self.hotpixels)>0:
@@ -881,7 +907,6 @@ class EudetData:
             cluster.Statistics()	
 	
         clusters = [cluster for cluster in clusters if cluster.totalTOT>0]
-
         clusterid = 0
 
         for cluster in clusters :
