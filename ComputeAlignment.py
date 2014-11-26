@@ -34,7 +34,7 @@ parser.add_option("-s", "--sensor",
                   help="Sensor type", dest="SENSOR", default="Timepix")
 
 parser.add_option("-i", "--dut ID",
-                  help="DUT ID", dest="DUTID", default="6")
+                  help="DUT ID", dest="DUTID", type="int", default=6)
 
 
 (options, args) = parser.parse_args()

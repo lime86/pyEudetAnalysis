@@ -35,7 +35,7 @@ parser.add_option("-s", "--sensor",
                   help="Sensor type : Timepix, Timepix3 or CLICpix", dest="SENSOR", default="Timepix")
 
 parser.add_option("-i", "--dut ID",
-                  help="DUT ID", dest="DUTID", default="6")
+                  help="DUT ID", dest="DUTID", type="int", default=6)
 
 
 (options, args) = parser.parse_args()
@@ -179,18 +179,18 @@ n_matched = 0
 n_matched_edge = 0
 last_time = time.time()
 distances_histo = TH1F("distances_histo","",100,0.0,1.0)
-prev_pixel_xhits = []
+prev_pixel_xhits = [999, 999]
 
 for i in range(0,n_proc) :
     aDataSet.getEvent(i)
-
+    
     # is this a new pixel map?
     npixels_hit = len(aDataSet.p_col)
     pixel_x_hits = []
     for k in xrange(npixels_hit):
         pixel_x_hits.append(aDataSet.p_col[k])
 
-    if (pixel_x_hits == prev_pixel_xhits and len(pixel_x_hits)!=0):
+    if (pixel_x_hits == prev_pixel_xhits):
         # same pixel map as before, will add clusters already computed
         aDataSet.AllClusters.append(clusters_tmp)
     else:

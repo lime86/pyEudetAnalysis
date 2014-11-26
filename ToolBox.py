@@ -921,7 +921,7 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
     print "best guess for rotation matrix: resr.x", resr.x
     if resr.success == False:
         print "Minimisation didn't converge. Press any key to continue, ctrl D to exit"
-        #b=raw_input()
+        b=raw_input()
 
 
     argTuple = resr.x,aDataSet,nevent,skip,cut,dut  
@@ -930,7 +930,7 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
     print "best guess for x translation: rest.x", rest.x
     if rest.success == False:
         print "Minimisation didn't converge. Press any key to continue, ctrl D to exit"
-        #b=raw_input() 
+        b=raw_input() 
 
     argTuple = rest.x[0],resr.x,aDataSet,nevent,skip,cut,dut
     rest2= minimize(TotalMeanFunctionY,x_ty, argTuple,method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
@@ -938,7 +938,7 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
     print "best guess for y translation: rest2.x", rest2.x
     if rest2.success == False:
         print "Minimisation didn't converge. Press any key to continue, ctrl D to exit"
-        #b=raw_input() 
+        b=raw_input() 
 
     f = open(filename,'a')
     f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(resr.x[0],resr.x[1],resr.x[2],rest.x[0],rest2.x[0]))
@@ -989,7 +989,7 @@ def FindSigmaMin(dataSet,nevent,skip=1, dut=6) :
             if sigmaint == (sigmaint_max-1):
                 print "WARNING sigma optimisation hit limit. Adjust limit."
                 print "Press any key to continue, ctrl+D to exit"
-                #blah = raw_input()
+                blah = raw_input()
 
     print "Best sigma found: %f um, giving resolution: %f um" %(bestsigma*1000,bestres*1000)
     return bestsigma,bestsigma
