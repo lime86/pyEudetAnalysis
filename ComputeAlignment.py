@@ -24,9 +24,6 @@ parser.add_option("-d", "--data",
 parser.add_option("-o", "--output",
                   help="Path to histograms and results output folder", dest="OUTPUT", default=".")
 
-parser.add_option("-a", "--alignment",
-                  help="Path to alignment file", dest="ALIGNMENT", default="alignment.txt")
-
 parser.add_option("-e", "--edge",
                   help="Edge width", dest="EDGE", default=0.0, type="float")
 
@@ -84,14 +81,6 @@ else :
     parser.print_help()
     exit()
 
-if(options.ALIGNMENT):
-    AlignmentPath = "%s/Alignment.txt"%(options.ALIGNMENT)
-else :
-    print "Please provide path for alignment file (-a [PathToFile], put no / at the end)"
-    print "The file name will be created to include run, method, nevents, skip"
-    parser.print_help()
-    exit()
-
 if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
     future_builtins.SensorType=options.SENSOR
 else :
@@ -105,7 +94,6 @@ else :
     dutID=6
 
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
-os.system("mkdir %s/Run%i/%s"%(PlotPath,RunNumber,method_name))
 
 from ROOT import *
 import ROOT
@@ -140,8 +128,7 @@ else:
     skip = 1
 print "Running on run %i, with method %s, on %i events with skip %i" %(RunNumber,method_name,n_proc,skip)
 
-dot = AlignmentPath.rfind('.')
-AlignmentPath = AlignmentPath[:dot] + '_run%i_%s_%i_%i' %(RunNumber, method_name, int(options.NEVENT), skip) + AlignmentPath[dot:]
+AlignmentPath = "%s/Run%i/Alignment_%i_%s_%i_%i.txt" %(PlotPath,RunNumber,RunNumber,method_name,int(options.NEVENT),skip)
 print "Alignment path will be", AlignmentPath
 
 
@@ -311,8 +298,7 @@ c_resY2hit.Update()
 resY2hit = resY2hit_hist.GetListOfFunctions()[0].GetParameter(2)
 
 # Write all histograms to output root file
-out = TFile("%s/Run%i/%s/alignment_rootfile.root"%(PlotPath,RunNumber,method_name), "recreate")
-out.cd()
+out = TFile("%s/Run%i/AlignmentPlots_%i_%s_%i_%i.root" %(PlotPath,RunNumber,RunNumber,method_name,int(options.NEVENT),skip), "recreate")
 tccorx1.Write()
 tccory1.Write()
 tccorx2.Write()
@@ -327,6 +313,7 @@ resX_hist.Write()
 resY_hist.Write()
 resX2hit_hist.Write()
 resY2hit_hist.Write()
+out.Close()
 
 print "Found %i matched track-cluster binome"%n_matched
 print "resX", resX
