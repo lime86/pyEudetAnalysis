@@ -693,7 +693,7 @@ def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0
                     h_dist_y_3.Fill(disty)
 
 
-    result=sqrt(rms(dist_tmp_x)**2 + rms(dist_tmp_x)**2)/n
+    result=sqrt(rms(dist_tmp_x)**2 + rms(dist_tmp_y)**2)/n
     print "Evaluating for Rotation : %.9f %.9f %.9f [deg] Trans : %f %f  [mm] metric = %.9f  n = %i"%(Rotations[0],Rotations[1],Rotations[2],Translations[0],Translations[1],result,n)
     return result
 
