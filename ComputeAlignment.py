@@ -227,7 +227,7 @@ tccory2.Draw("colz")
 
 niter = 2
 for i in range(niter) :
-    resr,rest = Perform3StepAlignment(aDataSet,[[0,360],[0,360],[0,360],[-0.5,0.5],[-0.5,0.5]],n_proc,skip,0.05,AlignmentPath,1e-5,[0,0,0], dutID)
+    resr,rest = Perform3StepAlignment(aDataSet,[[0,360],[0,360],[0,360],[-0.5,0.5],[-0.5,0.5]],n_proc,skip,0.05,AlignmentPath,[0,0,0], dutID)
     ApplyAlignment(aDataSet,rest,resr,dutID)
 
 

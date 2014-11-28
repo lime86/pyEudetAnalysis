@@ -666,13 +666,9 @@ def TotalRotationFunctionZ(zang,Rotations,Translations,aDataDet,nevents,skip=1,c
 def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0.1,dut=6):
 
     n = 0
-    dist_tmp_x = []
-    dist_tmp_y = []
-    dist_good_x = []
-    dist_good_y = []
     rotationMatrix = RotationMatrix(Rotations)
-    h_dist_x_3 = TH1D("h_dist_x_3","TotalRotationFunction: dist_x",8000,-4.,4.)
-    h_dist_y_3 = TH1D("h_dist_y_3","TotalRotationFunction: dist_y",8000,-4.,4.)
+    h_dist_x_3 = TH1D("h_dist_x_3","TotalRotationFunction: dist_x",100,-0.5,0.5)
+    h_dist_y_3 = TH1D("h_dist_y_3","TotalRotationFunction: dist_y",100,-0.5,0.5)
 
     for i,clusters in enumerate(aDataDet.AllClusters[0:nevents]) :
         for cluster in clusters :
@@ -686,14 +682,28 @@ def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0
                     disty=cluster.absY -tmp[1]
 
                     if((distx*distx + disty*disty) < (cut*cut)):                        
-                        dist_tmp_x.append(distx)
-                        dist_tmp_y.append(disty)
                         n+=1
+
                     h_dist_x_3.Fill(distx)
                     h_dist_y_3.Fill(disty)
+                    
+    gx = TF1("gx","gaus",-0.1,0.1)
+    if h_dist_x_3.GetEffectiveEntries() > 10.:
+        rX = h_dist_x_3.Fit(gx,"RSQ","")
+        sigmaResX = rX.Parameter(2)
+    else:
+        print "TotalRotationFunctionZ: not enough events to fit"
+        sigmaResX = 9.
 
+    gy = TF1("gy","gaus",-0.1,0.1)
+    if h_dist_y_3.GetEffectiveEntries() > 10.:
+        rY = h_dist_y_3.Fit(gy,"RSQ","")
+        sigmaResY = rY.Parameter(2)
+    else:
+        print "TotalRotationFunctionZ: not enough events to fit"
+        sigmaResY = 9.
 
-    result=sqrt(rms(dist_tmp_x)**2 + rms(dist_tmp_y)**2)/n
+    result = sqrt(sigmaResX**2 + sigmaResY**2)/n
     print "Evaluating for Rotation : %.9f %.9f %.9f [deg] Trans : %f %f  [mm] metric = %.9f  n = %i"%(Rotations[0],Rotations[1],Rotations[2],Translations[0],Translations[1],result,n)
     return result
 
@@ -902,7 +912,7 @@ def PerformAlignement(aDataSet, boundary) :
     return res.x[0:3],res.x[3:]
 
 
-def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alignment.txt',gtol=1e-5,Rotations=[0,0,0], dut=6) :
+def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alignment.txt',Rotations=[0,0,0], dut=6) :
     x_tx = np.array([0.])
     x_ty = np.array([0.])
     xr= np.array(Rotations)
@@ -916,7 +926,7 @@ def Perform3StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
     xr= np.array([0,0,rZ])
     
     argTuple = [x_tx,x_ty],aDataSet,nevent,skip,cut,dut        
-    resr = minimize(TotalRotationFunction,xr,argTuple,method='BFGS',options={'disp': True,'gtol': gtol , 'eps':0.5, 'maxiter' : 15 })
+    resr = minimize(TotalRotationFunction,xr,argTuple,method='Nelder-Mead',options={'xtol': 1e-6,'disp': True})
     print "resr", resr
     print "best guess for rotation matrix: resr.x", resr.x
     if resr.success == False:
