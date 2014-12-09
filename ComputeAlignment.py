@@ -131,20 +131,9 @@ print "Running on run %i, with method %s, on %i events with skip %i" %(RunNumber
 AlignmentPath = "%s/Run%i/Alignment_%i_%s_%i_%i.txt" %(PlotPath,RunNumber,RunNumber,method_name,int(options.NEVENT),skip)
 print "Alignment path will be", AlignmentPath
 
-
-# Load hot pixels
-hotpixel_filename = "%s/Run%i/HotPixels_%i_0.01.txt" %(PlotPath,RunNumber,RunNumber)
-print "Hotpixel filename:", hotpixel_filename
-if os.path.isfile(hotpixel_filename):
-    aDataSet.LoadHotPixel(hotpixel_filename)
-else:
-    print "WARNING no hot pixel file found. No hot pixels set"
-
-
 prev_pixel_xhits = [999, 999]
-last_time=time.time()
-
 clusters_tmp = []
+last_time=time.time()
 
 for i in range(0,n_proc) :
     aDataSet.getEvent(i)
@@ -160,7 +149,10 @@ for i in range(0,n_proc) :
         aDataSet.AllClusters.append(clusters_tmp)
     else:
         # this is a new event, will cluster
-        etacorr_sigma = 0.003
+        #etacorr_sigma = 0.003 # 50um
+        #etacorr_sigma = 0.005 # 100um
+        etacorr_sigma = 0.013 # 300um
+        #etacorr_sigma = 0.010 # 500um
         aDataSet.ClusterEvent(i, method_name, etacorr_sigma)
         clusters_tmp = aDataSet.AllClusters[i]
     prev_pixel_xhits = pixel_x_hits
@@ -174,7 +166,7 @@ for i in range(0,n_proc) :
 last_time=time.time()
 
 tccorx1,tccory1 = TrackClusterCorrelation(aDataSet, dutID,n_proc)
-tccorx1.SetName("tccor1")
+tccorx1.SetName("tccorx1")
 tccory1.SetName("tccory1")
 cantccorx1 = TCanvas()
 tccorx1.Draw("colz")
@@ -224,12 +216,9 @@ tccorx2.Draw("colz")
 cancory2 = TCanvas()
 tccory2.Draw("colz")
 
-
-niter = 2
-for i in range(niter) :
-    resr,rest = Perform3StepAlignment(aDataSet,[[0,360],[0,360],[0,360],[-0.5,0.5],[-0.5,0.5]],n_proc,skip,0.05,AlignmentPath,[0,0,0], dutID)
-    ApplyAlignment(aDataSet,rest,resr,dutID)
-
+max_matched_dist = 0.1
+resr,rest = PerformAlignement(aDataSet,n_proc,skip,max_matched_dist,AlignmentPath,dutID)
+ApplyAlignment(aDataSet,rest,resr,dutID)
 
 tccorx3,tccory3 = TrackClusterCorrelation(aDataSet, dutID,n_proc)
 tccorx3.SetName("tccorx3")
@@ -297,6 +286,19 @@ resY2hit_hist.Draw()
 c_resY2hit.Update()
 resY2hit = resY2hit_hist.GetListOfFunctions()[0].GetParameter(2)
 
+print "Found %i matched track-cluster binome"%n_matched
+print "resX", resX
+print "resY", resY
+print "sqrt(resX**2 + resY**2)", sqrt(resX**2 + resY**2)
+print "resX2hit", resX2hit
+print "resY2hit", resY2hit
+print "sqrt(resX2hit**2 + resY2hit**2)", sqrt(resX2hit**2 + resY2hit**2)
+
+print "Writing alignment constants to file", AlignmentPath
+f = open(AlignmentPath,'a')
+f.write("Rotation : %f %f %f [deg] Trans : %f %f  [mm] \n"%(resr[0],resr[1],resr[2],rest[0],rest[1]))
+f.close()
+
 # Write all histograms to output root file
 out = TFile("%s/Run%i/AlignmentPlots_%i_%s_%i_%i.root" %(PlotPath,RunNumber,RunNumber,method_name,int(options.NEVENT),skip), "recreate")
 tccorx1.Write()
@@ -314,12 +316,3 @@ resY_hist.Write()
 resX2hit_hist.Write()
 resY2hit_hist.Write()
 out.Close()
-
-print "Found %i matched track-cluster binome"%n_matched
-print "resX", resX
-print "resY", resY
-print "sqrt(resX**2 + resY**2)", sqrt(resX**2 + resY**2)
-print "resX2hit", resX2hit
-print "resY2hit", resY2hit
-print "sqrt(resX2hit**2 + resY2hit**2)", sqrt(resX2hit**2 + resY2hit**2)
-print "Produced Alignment file %s"%AlignmentPath
