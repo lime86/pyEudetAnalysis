@@ -41,5 +41,10 @@ someData_in_um = 1000*um
 
 scaler =1
 
-
+# global calibration constants
+# this needs to know the assembly name
+globalCalib_a = 29.79
+globalCalib_b = 534.1
+globalCalib_c = 1817.0
+globalCalib_t = 0.6562
 
