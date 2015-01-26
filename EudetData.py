@@ -22,7 +22,7 @@ import os, ast
 ###############################################################################################################################
 import future_builtins #Timepix3/CLICpix analysis
 SensorType=future_builtins.SensorType  #Timepix3/CLICpix analysis
-
+Assembly=future_builtins.Assembly
 
 class EudetData:
     """A container for TBTrack Data """
@@ -296,9 +296,10 @@ class EudetData:
 
         self.p_energyGC = []
         self.p_energyPbPC = []
-        for tot in self.p_tot :
-            self.p_energyGC.append( ( globalCalib_t*globalCalib_a + tot - globalCalib_b + sqrt( ( globalCalib_b + globalCalib_t*globalCalib_a - tot )**2 + 4*globalCalib_a*globalCalib_c ) ) / (2*globalCalib_a) ) # energy in keV
-            self.p_energyPbPC.append( 0. )
+        if Assembly!="AssemblyNotDefined":
+            for tot in self.p_tot :
+                self.p_energyGC.append( ( globalCalib_t*globalCalib_a + tot - globalCalib_b + sqrt( ( globalCalib_b + globalCalib_t*globalCalib_a - tot )**2 + 4*globalCalib_a*globalCalib_c ) ) / (2*globalCalib_a) ) # energy in keV
+                self.p_energyPbPC.append( 0. )
 
  #       for index,totvalue in enumerate(self.p_tot) :
  #           self.p_tot[index]=float(totvalue)/self.scale

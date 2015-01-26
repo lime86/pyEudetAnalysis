@@ -36,6 +36,9 @@ parser.add_option("-s", "--sensor",
 parser.add_option("-i", "--dut ID",
                   help="DUT ID", dest="DUTID", type="int", default=6)
 
+parser.add_option("-b", "--assembly",
+                  help="Assembly name", dest="ASSEMBLY", default="AssemblyNotDefined")
+
 (options, args) = parser.parse_args()
 
 if(options.RUN) :
@@ -103,6 +106,13 @@ if(options.DUTID) :
     dutID = int(options.DUTID)
 else :
     dutID=6
+
+future_builtins.Assembly="AssemblyNotDefined"
+if(options.ASSEMBLY) :
+    future_builtins.Assembly=options.ASSEMBLY
+else :
+    future_builtins.Assembly="AssemblyNotDefined"
+    print "Assembly not defined. You will not get calibrated data."
 
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
 os.system("mkdir %s/Run%i/%s"%(PlotPath,RunNumber,method_name))
