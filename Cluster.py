@@ -38,6 +38,8 @@ class Cluster:
     col = []
     row = []
     tot = []
+    energyGC = []
+    energyPbPC = []
     sizeX = 0
     sizeY = 0
     size  = 0
@@ -68,11 +70,15 @@ class Cluster:
         self.col = []
         self.row = []
         self.tot = []
+        self.energyGC = []
+        self.energyPbPC = []
 
-    def addPixel(self,col,row,tot):
+    def addPixel(self,col,row,tot,energyGC,energyPbPC):
         self.col.append(col)
         self.row.append(row)
         self.tot.append(tot)
+        self.energyGC.append(energyGC)
+        self.energyPbPC.append(energyPbPC)
 
     def Print(self):
         for i in range(len(self.col)):
@@ -86,6 +92,8 @@ class Cluster:
         self.sizeX=max(self.col)-min(self.col)+1
         self.sizeY=max(self.row)-min(self.row)+1
         self.aspectRatio=float(self.sizeY)/self.sizeX
+        self.totalEnergyGC = fsum(self.energyGC)
+        self.totalEnergyPbPC = fsum(self.energyPbPC)
 
 #
 #compute the hit position as the mean of the fired pixels positions weighted by their deposited energy

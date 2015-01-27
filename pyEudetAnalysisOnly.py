@@ -36,6 +36,9 @@ parser.add_option("-s", "--sensor",
 parser.add_option("-i", "--dut ID",
                   help="DUT ID", dest="DUTID", type="int", default=6)
 
+parser.add_option("-b", "--assembly",
+                  help="Assembly name", dest="ASSEMBLY", default="AssemblyNotDefined")
+
 (options, args) = parser.parse_args()
 
 if(options.RUN) :
@@ -103,6 +106,13 @@ if(options.DUTID) :
     dutID = int(options.DUTID)
 else :
     dutID=6
+
+future_builtins.Assembly="AssemblyNotDefined"
+if(options.ASSEMBLY) :
+    future_builtins.Assembly=options.ASSEMBLY
+else :
+    future_builtins.Assembly="AssemblyNotDefined"
+    print "Assembly not defined. You will not get calibrated data."
 
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
 os.system("mkdir %s/Run%i/%s"%(PlotPath,RunNumber,method_name))
@@ -393,15 +403,25 @@ canEtaCorr.SaveAs("%s/Run%i/%s/Eta_hist.pdf"%(PlotPath,RunNumber,method_name))
 
 last_time = time.time()
 
-allTOT = TH1D("allTOT","TOT spectrum, all cluster sizes",5000,0,5000)
-TOT1 = TH1D("TOT1","TOT spectrum, cluster size = 1",5000,0,5000)
+allTOT = TH1D("allTOT","TOT spectrum, all cluster sizes",5000,0,10000)
+TOT1 = TH1D("TOT1","TOT spectrum, cluster size = 1",5000,0,10000)
 TOT1.SetLineColor(1)
-TOT2 = TH1D("TOT2","TOT spectrum, cluster size = 2",5000,0,5000)
+TOT2 = TH1D("TOT2","TOT spectrum, cluster size = 2",5000,0,10000)
 TOT2.SetLineColor(2)
-TOT3 = TH1D("TOT3","TOT spectrum, cluster size = 3",5000,0,5000)
+TOT3 = TH1D("TOT3","TOT spectrum, cluster size = 3",5000,0,10000)
 TOT3.SetLineColor(3)
-TOT4 = TH1D("TOT4","TOT spectrum, cluster size = 4",5000,0,5000)
+TOT4 = TH1D("TOT4","TOT spectrum, cluster size = 4",5000,0,10000)
 TOT4.SetLineColor(4)
+
+allEnergyGC = TH1D("allEnergyGC","EnergyGC spectrum, all cluster sizes",500,0,500)
+EnergyGC1 = TH1D("EnergyGC1","EnergyGC spectrum, cluster size = 1",500,0,500)
+EnergyGC1.SetLineColor(1)
+EnergyGC2 = TH1D("EnergyGC2","EnergyGC spectrum, cluster size = 2",500,0,500)
+EnergyGC2.SetLineColor(2)
+EnergyGC3 = TH1D("EnergyGC3","EnergyGC spectrum, cluster size = 3",500,0,500)
+EnergyGC3.SetLineColor(3)
+EnergyGC4 = TH1D("EnergyGC4","EnergyGC spectrum, cluster size = 4",500,0,500)
+EnergyGC4.SetLineColor(4)
 
 resX = TH1D("resX","Unbiased residual X, all clusters",600,-0.150,0.150)
 resY = TH1D("resY","Unbiased residual Y, all clusters",600,-0.150,0.150)
@@ -457,6 +477,7 @@ for j,tracks in enumerate(aDataSet.AllTracks) :
         if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
             aCluster = aDataSet.AllClusters[j][track.cluster]
             allTOT.Fill(aCluster.totalTOT)
+            allEnergyGC.Fill(aCluster.totalEnergyGC)
             relX_vs_relY.Fill(aCluster.relX,aCluster.relY)
             resX.Fill(aCluster.resX)
             resY.Fill(aCluster.resY)
@@ -481,12 +502,16 @@ for j,tracks in enumerate(aDataSet.AllTracks) :
 
             if(aCluster.size==1) :
                 TOT1.Fill(aCluster.totalTOT)
+                EnergyGC1.Fill(aCluster.totalEnergyGC)
             if(aCluster.size==2) :
                 TOT2.Fill(aCluster.totalTOT)
+                EnergyGC2.Fill(aCluster.totalEnergyGC)
             if(aCluster.size==3) :
                 TOT3.Fill(aCluster.totalTOT)
+                EnergyGC3.Fill(aCluster.totalEnergyGC)
             if(aCluster.size==4) :
                 TOT4.Fill(aCluster.totalTOT)
+                EnergyGC4.Fill(aCluster.totalEnergyGC)
 print "Elapsed time for Residual, cluster and TOT plots: %f s"%(time.time()-last_time)
 
 can3 = TCanvas()
@@ -563,6 +588,11 @@ can1 = TCanvas()
 h1_style(allTOT,1)
 allTOT.Draw()
 can1.SaveAs("%s/Run%i/%s/allTOT.pdf"%(PlotPath,RunNumber,method_name))
+
+h1_style(allEnergyGC,1)
+allEnergyGC.Draw()
+can1.SaveAs("%s/Run%i/%s/allEnergyGC.pdf"%(PlotPath,RunNumber,method_name))
+
 
 ###############################################################################################################################
 #
@@ -702,6 +732,10 @@ h1_style(TOT1,1)
 h1_style(TOT2,1)
 h1_style(TOT3,1)
 h1_style(TOT4,1)
+h1_style(EnergyGC1,1)
+h1_style(EnergyGC2,1)
+h1_style(EnergyGC3,1)
+h1_style(EnergyGC4,1)
 
 can2=TCanvas()
 can2.cd()
@@ -748,6 +782,50 @@ leg2.SetFillStyle(0)
 leg2.Draw("SAME")
 TOT1.SetTitle("Tot spectrum")
 can2.SaveAs("%s/Run%i/%s/TOTnormalized.pdf"%(PlotPath,RunNumber,method_name))
+
+EnergyGC1.Draw()
+EnergyGC2.Draw("sames")
+EnergyGC3.Draw("sames")
+EnergyGC4.Draw("sames")
+gPad.Update()
+st_EnergyGC1 = EnergyGC1.GetListOfFunctions().FindObject("stats")
+st_EnergyGC1.SetX1NDC(0.690)
+st_EnergyGC1.SetY1NDC(0.623)
+st_EnergyGC1.SetX2NDC(0.838)
+st_EnergyGC1.SetY2NDC(0.879)
+st_EnergyGC1.SetOptStat(111111)
+# gPad.Update()
+st_EnergyGC2 = EnergyGC2.GetListOfFunctions().FindObject("stats")
+st_EnergyGC2.SetX1NDC(0.846)
+st_EnergyGC2.SetY1NDC(0.623)
+st_EnergyGC2.SetX2NDC(0.984)
+st_EnergyGC2.SetY2NDC(0.879)
+st_EnergyGC2.SetOptStat(111111)
+# gPad.Update()
+st_EnergyGC3 = EnergyGC3.GetListOfFunctions().FindObject("stats")
+st_EnergyGC3.SetX1NDC(0.690)
+st_EnergyGC3.SetY1NDC(0.360)
+st_EnergyGC3.SetX2NDC(0.838)
+st_EnergyGC3.SetY2NDC(0.616)
+st_EnergyGC3.SetOptStat(111111)
+# gPad.Update()
+st_EnergyGC4 = EnergyGC4.GetListOfFunctions().FindObject("stats")
+st_EnergyGC4.SetX1NDC(0.846)
+st_EnergyGC4.SetY1NDC(0.360)
+st_EnergyGC4.SetX2NDC(0.984)
+st_EnergyGC4.SetY2NDC(0.616)
+st_EnergyGC4.SetOptStat(111111)
+leg2 = TLegend(0.48,0.69,0.68,0.88)
+leg2.SetBorderSize(0)
+leg2.AddEntry(EnergyGC1,"cluster size 1","l")
+leg2.AddEntry(EnergyGC2,"cluster size 2","l")
+leg2.AddEntry(EnergyGC3,"cluster size 3","l")
+leg2.AddEntry(EnergyGC4,"cluster size 4","l")
+leg2.SetFillColor(0)
+leg2.SetFillStyle(0)
+leg2.Draw("SAME")
+EnergyGC1.SetTitle("EnergyGC spectrum")
+can2.SaveAs("%s/Run%i/%s/EnergyGCnormalized.pdf"%(PlotPath,RunNumber,method_name))
 
 can7 = TCanvas()
 SquareCanvas(can7)
@@ -979,6 +1057,11 @@ TOT1.Write()
 TOT2.Write()
 TOT3.Write()
 TOT4.Write()
+allEnergyGC.Write()
+EnergyGC1.Write()
+EnergyGC2.Write()
+EnergyGC3.Write()
+EnergyGC4.Write()
 resX.Write()
 resY.Write()
 HitProb_1_cluster_binning1m.Write()

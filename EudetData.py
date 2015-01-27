@@ -22,7 +22,7 @@ import os, ast
 ###############################################################################################################################
 import future_builtins #Timepix3/CLICpix analysis
 SensorType=future_builtins.SensorType  #Timepix3/CLICpix analysis
-
+Assembly=future_builtins.Assembly
 
 class EudetData:
     """A container for TBTrack Data """
@@ -75,7 +75,8 @@ class EudetData:
     p_chip= 0
     p_iden= 0
     p_euEv = 0
-
+    p_energyGC = []
+    p_energyPbPC = []
 
     edge = 0
 #     p_col = []
@@ -288,10 +289,17 @@ class EudetData:
         self.p_col= self.pixelTree.col
         self.p_row= self.pixelTree.row
         self.p_tot= self.pixelTree.tot
-        self.p_lv1= self.pixelTree.lv1
+        #self.p_lv1= self.pixelTree.lv1 removing for Timepix3
         #self.p_chip= self.pixelTree.chip
         self.p_iden= self.pixelTree.iden
         self.p_euEv = self.pixelTree.euEvt
+
+        self.p_energyGC = []
+        self.p_energyPbPC = []
+        if Assembly!="AssemblyNotDefined":
+            for tot in self.p_tot :
+                self.p_energyGC.append( ( globalCalib_t*globalCalib_a + tot - globalCalib_b + sqrt( ( globalCalib_b + globalCalib_t*globalCalib_a - tot )**2 + 4*globalCalib_a*globalCalib_c ) ) / (2*globalCalib_a) ) # energy in keV
+                self.p_energyPbPC.append( 0. )
 
  #       for index,totvalue in enumerate(self.p_tot) :
  #           self.p_tot[index]=float(totvalue)/self.scale
@@ -368,11 +376,15 @@ class EudetData:
                 cluster.col.append(self.pixelTree.col[i])
                 cluster.row.append(self.pixelTree.row[i])
                 cluster.tot.append(self.pixelTree.tot[i])
+                cluster.energyGC.append(self.pixelTree.energyGC[i])
+                cluster.energyPbPC.append(self.pixelTree.energyPbPC[i])
             event = self.pixelTree.event
             cluster.sizeX = self.pixelTree.sizeX
             cluster.sizeY =self.pixelTree.sizeY
             cluster.size  = self.pixelTree.size
             cluster.totalTOT =self.pixelTree.totalTOT
+            cluster.totalEnergyGC =self.pixelTree.totalEnergyGC
+            cluster.totalEnergyPbPC =self.pixelTree.totalEnergyPbPC
             cluster.aspectRatio = self.pixelTree.aspectRatio
             cluster.relX = self.pixelTree.relX
             cluster.relY = self.pixelTree.relY
@@ -461,11 +473,15 @@ class EudetData:
         col = array( 'i', maxn*[ 0 ] )
         row = array( 'i', maxn*[ 0 ] )
         tot = array( 'f', maxn*[ 0. ] )
+        energyGC = array( 'f', maxn*[ 0. ] )
+        energyPbPC = array( 'f', maxn*[ 0. ] )
         event = array( 'i', [ 0 ] )
         sizeX = array( 'i', [ 0 ] )
         sizeY = array( 'i', [ 0 ] )
         size  = array( 'i', [ 0 ] )
         totalTOT =array( 'f', [ 0. ] )
+        totalEnergyGC = array( 'f', [ 0. ] )
+        totalEnergyPbPC = array( 'f', [ 0. ] )
         aspectRatio = array( 'f', [ 0. ] )
         relX = array( 'f', [ 0. ] )
         relY = array( 'f', [ 0. ] )
@@ -483,6 +499,8 @@ class EudetData:
         clusterTree.Branch( 'sizeX', sizeX, 'sizeX/I' )
         clusterTree.Branch( 'sizeY', sizeY, 'sizeY/I' )
         clusterTree.Branch( 'totalTOT', totalTOT, 'totalTOT/F' )
+        clusterTree.Branch( 'totalEnergyGC', totalEnergyGC, 'totalEnergyGC/F' )
+        clusterTree.Branch( 'totalEnergyPbPC', totalEnergyPbPC, 'totalEnergyPbPC/F' )
         clusterTree.Branch( 'aspectRatio', aspectRatio, 'aspectRatio/F' )
         clusterTree.Branch( 'relX', relX, 'relX/F' )
         clusterTree.Branch( 'relY', relY, 'relY/F' )
@@ -497,6 +515,8 @@ class EudetData:
         clusterTree.Branch( 'col', col, 'col[size]/I' )
         clusterTree.Branch( 'row', row, 'row[size]/I' )
         clusterTree.Branch( 'tot', tot, 'tot[size]/F' )
+        clusterTree.Branch( 'energyGC', energyGC, 'energyGC[size]/F' )
+        clusterTree.Branch( 'energyPbPC', energyPbPC, 'energyPbPC[size]/F' )
 
 
         for j,clusters in enumerate(self.AllClusters) :
@@ -510,6 +530,10 @@ class EudetData:
                         row[i]=cluster.row[i]
                     for i in range(len(cluster.tot)) :
                         tot[i]=cluster.tot[i]
+                    for i in range(len(cluster.energyGC)) :
+                        energyGC[i]=cluster.energyGC[i]
+                    for i in range(len(cluster.energyPbPC)) :
+                        energyPbPC[i]=cluster.energyPbPC[i]
 			
 		else : 
 	   	    for i in range(maxn) :
@@ -518,12 +542,18 @@ class EudetData:
                         row[i]=cluster.row[i]
                     for i in range(maxn) :
                         tot[i]=cluster.tot[i]
+                    for i in range(maxn) :
+                        energyGC[i]=cluster.energyGC[i]
+                    for i in range(maxn) :
+                        energyPbPC[i]=cluster.energyPbPC[i]
 					
 
                 sizeX[0]=cluster.sizeX
                 sizeY[0]=cluster.sizeY
                 size[0]=cluster.size
                 totalTOT[0]=cluster.totalTOT
+                totalEnergyGC[0]=cluster.totalEnergyGC
+                totalEnergyPbPC[0]=cluster.totalEnergyPbPC
                 aspectRatio[0]=cluster.aspectRatio
                 relX[0]=cluster.relX
                 relY[0]=cluster.relY
@@ -862,6 +892,8 @@ class EudetData:
         row_tmp = [s for s in self.p_row]
         col_tmp = [s for s in self.p_col]
         tot_tmp = [s for s in self.p_tot]
+        energyGC_tmp = [s for s in self.p_energyGC]
+        energyPbPC_tmp = [s for s in self.p_energyPbPC]
 
         # ------------------------------------------------------------------------------------#
         # Temporary solution for pixels hit several times. Include TOA in the future analysis
@@ -879,6 +911,8 @@ class EudetData:
             row_tmp=[ row_tmp[k] for k in range(0, len(row_tmp)) if k not in indexPixelsToRemove ]
             col_tmp=[ col_tmp[k] for k in range(0, len(col_tmp)) if k not in indexPixelsToRemove ]   
             tot_tmp=[ tot_tmp[k] for k in range(0, len(tot_tmp)) if k not in indexPixelsToRemove ]
+            energyGC_tmp=[ energyGC_tmp[k] for k in range(0,len(energyGC_tmp)) if k not in indexPixelsToRemove ]
+            energyPbPC_tmp=[ energyPbPC_tmp[k] for k in range(0,len(energyPbPC_tmp)) if k not in indexPixelsToRemove ]
         # ------------------------------------------------------------------------------------#
 
         # remove hot pixels
@@ -889,13 +923,15 @@ class EudetData:
                     col_tmp.pop(hpindex)
                     row_tmp.pop(hpindex)
                     tot_tmp.pop(hpindex)
+                    energyGC_tmp.pop(hpindex)
+                    energyPbPC_tmp.pop(hpindex)
                 else :
                     hpindex+=1
 
         # set a maximum number of hit pixels to be clustered (skips large events)
         if len(col_tmp) < 5000:
             try : 
-                clusters = self.SciPyClustering(col_tmp,row_tmp,tot_tmp)
+                clusters = self.SciPyClustering(col_tmp,row_tmp,tot_tmp,energyGC_tmp,energyPbPC_tmp)
             except : 
                 clusters=[]
         else:
@@ -929,17 +965,17 @@ class EudetData:
 
 
 
-    def SciPyClustering(self,col,row,tot):
+    def SciPyClustering(self,col,row,tot,energyGC,energyPbPC):
 
         pixels = [[col[i],row[i]] for i,x in enumerate(col)]
         if(len(pixels)>1):
             result=fclusterdata(pixels,sqrt(2.),criterion="distance")
             clusters=[Cluster() for i in range(max(result))]
-            [clusters[x-1].addPixel(col[j],row[j],tot[j]) for j,x in enumerate(result)]
+            [clusters[x-1].addPixel(col[j],row[j],tot[j],energyGC[j],energyPbPC[j]) for j,x in enumerate(result)]
         else:
             if(len(pixels)==1):
                 c=Cluster()
-                c.addPixel(col[0],row[0],tot[0])
+                c.addPixel(col[0],row[0],tot[0],energyGC[0],energyPbPC[0])
                 clusters=[c]        
 	
 	return clusters
