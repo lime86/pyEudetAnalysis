@@ -33,6 +33,8 @@ parser.add_option("-s", "--sensor",
 parser.add_option("-i", "--dut ID",
                   help="DUT ID", dest="DUTID", type="int", default=6)
 
+parser.add_option("-b", "--assembly",
+                  help="Assembly name", dest="ASSEMBLY", default="AssemblyNotDefined")
 
 (options, args) = parser.parse_args()
 
@@ -93,6 +95,14 @@ if(options.DUTID) :
 else :
     dutID=6
 
+
+future_builtins.Assembly="AssemblyNotDefined"
+if(options.ASSEMBLY) :
+    future_builtins.Assembly=options.ASSEMBLY
+else :
+    future_builtins.Assembly="AssemblyNotDefined"
+    print "Assembly not defined. You will not get calibrated data."
+
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
 
 from ROOT import *
@@ -149,9 +159,9 @@ for i in range(0,n_proc) :
         aDataSet.AllClusters.append(clusters_tmp)
     else:
         # this is a new event, will cluster
-        #etacorr_sigma = 0.003 # 50um
+        etacorr_sigma = 0.003 # 50um
         #etacorr_sigma = 0.005 # 100um
-        etacorr_sigma = 0.013 # 300um
+        #etacorr_sigma = 0.013 # 300um
         #etacorr_sigma = 0.010 # 500um
         aDataSet.ClusterEvent(i, method_name, etacorr_sigma)
         clusters_tmp = aDataSet.AllClusters[i]
