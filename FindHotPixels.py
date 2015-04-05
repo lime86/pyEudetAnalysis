@@ -27,6 +27,8 @@ parser.add_option("-e", "--edge",
 parser.add_option("-s", "--sensor",
                   help="Sensor type", dest="SENSOR", default="Timepix")
 
+parser.add_option("-b", "--assembly",
+                  help="Assembly name", dest="ASSEMBLY", default="AssemblyNotDefined")
 
 (options, args) = parser.parse_args()
 
@@ -63,6 +65,12 @@ else :
     parser.print_help()
     exit()
 
+future_builtins.Assembly="AssemblyNotDefined"
+if(options.ASSEMBLY) :
+    future_builtins.Assembly=options.ASSEMBLY
+else :
+    future_builtins.Assembly="AssemblyNotDefined"
+    print "Assembly not defined. You will not get calibrated data."
 
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
 
