@@ -89,3 +89,6 @@ elif Assembly == "C04-W0110":
 else:
     print "Assembly not defined or not recognised. No calibration constants loaded."
     future_builtins.Assembly="AssemblyNotDefined"
+
+# Elementary charge
+echarge=1.60217646e-19 # [C=As]
