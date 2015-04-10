@@ -297,9 +297,17 @@ class EudetData:
         self.p_energyGC = []
         self.p_energyPbPC = []
         if Assembly!="AssemblyNotDefined":
-            for tot in self.p_tot :
+            for tot,col,row in zip(self.p_tot,self.p_col,self.p_row) :
                 self.p_energyGC.append( ( globalCalib_t*globalCalib_a + tot - globalCalib_b + sqrt( ( globalCalib_b + globalCalib_t*globalCalib_a - tot )**2 + 4*globalCalib_a*globalCalib_c ) ) / (2*globalCalib_a) ) # energy in keV
-                self.p_energyPbPC.append( 0. )
+
+                if pixelCalib_a:
+                    if (( pixelCalib_b[col][row] + pixelCalib_t[col][row]*pixelCalib_a[col][row] - tot )**2 + 4*pixelCalib_a[col][row]*pixelCalib_c[col][row] > 0.) and ((2*pixelCalib_a[col][row]) != 0):
+                        self.p_energyPbPC.append( ( pixelCalib_t[col][row]*pixelCalib_a[col][row] + tot - pixelCalib_b[col][row] + sqrt( ( pixelCalib_b[col][row] + pixelCalib_t[col][row]*pixelCalib_a[col][row] - tot )**2 + 4*pixelCalib_a[col][row]*pixelCalib_c[col][row] ) ) / (2*pixelCalib_a[col][row]) )
+                    else:
+                        self.p_energyPbPC.append(0.)
+                else:
+                    self.p_energyPbPC.append(0.)
+                    
 
  #       for index,totvalue in enumerate(self.p_tot) :
  #           self.p_tot[index]=float(totvalue)/self.scale

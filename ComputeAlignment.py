@@ -161,7 +161,9 @@ for i in range(0,n_proc) :
         # this is a new event, will cluster
         #etacorr_sigma = 0.003 # 50um
         #etacorr_sigma = 0.005 # 100um
-        etacorr_sigma = 0.013 # 300um
+        #etacorr_sigma = 0.004 # 150um
+        etacorr_sigma = 0.009 # 200um
+        #etacorr_sigma = 0.013 # 300um
         #etacorr_sigma = 0.010 # 500um
         aDataSet.ClusterEvent(i, method_name, etacorr_sigma)
         clusters_tmp = aDataSet.AllClusters[i]
