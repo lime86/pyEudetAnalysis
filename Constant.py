@@ -70,60 +70,60 @@ home = environ['HOME']
 # calibration constants
 if Assembly == "B06-W0126":
     print "Taking calibration constants for B06-W0126"
-    globalCalib_a = 28.35
-    globalCalib_b = 661.7
-    globalCalib_c = 5161.0
-    globalCalib_t = -5.306
+    globalCalib_a = 30.07
+    globalCalib_b = 513.4
+    globalCalib_c = 1793.0
+    globalCalib_t = 0.4356
 
     pixelCalib_file = "%s/eos/clicdp/data/VertexCalibration/LatestResults/B06-W0125_KDECalibration_Pixels.root" %home
     pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
 
 elif Assembly == "A06-W0110":
     print "Taking calibration constants for A06-W0110"
-    globalCalib_a = 13.42
-    globalCalib_b = 385.6
-    globalCalib_c = 2865.0
-    globalCalib_t = -6.733
+    globalCalib_a = 13.45
+    globalCalib_b = 351.4
+    globalCalib_c = 1249.0
+    globalCalib_t = 0.2151
 
     pixelCalib_file = "%s/eos/clicdp/data/VertexCalibration/LatestResults/A06-W0110_KDECalibration_Pixels.root" %home
     pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
 
 elif Assembly == "D09-W0126":
     print "Taking calibration constants for D09-W0126"
-    globalCalib_a = 17.07
-    globalCalib_b = 478.1
-    globalCalib_c = 1446.0
-    globalCalib_t = 1.079
+    globalCalib_a = 16.72
+    globalCalib_b = 499.8
+    globalCalib_c = 1805.0
+    globalCalib_t = 0.125
 
     pixelCalib_file = "%s/eos/clicdp/data/VertexCalibration/LatestResults/D09-W0126_KDECalibration_Pixels.root" %home
     pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
 
 elif Assembly == "B07-W0125":
     print "Taking calibration constants for B07-W0125"
-    globalCalib_a = 12.42
-    globalCalib_b = 604.3
-    globalCalib_c = 8264.0
-    globalCalib_t = -11.12
+    globalCalib_a = 14.04
+    globalCalib_b = 424.3
+    globalCalib_c = 2366.0
+    globalCalib_t = -1.637
 
     pixelCalib_file = "%s/eos/clicdp/data/VertexCalibration/LatestResults/B07-W0125_KDECalibration_Pixels.root" %home
     pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
 
 elif Assembly == "L04-W0125":
     print "Taking calibration constants for L04-W0125"
-    globalCalib_a = 14.63
-    globalCalib_b = 494.8
-    globalCalib_c = 5514.0
-    globalCalib_t = -8.776
+    globalCalib_a = 15.58
+    globalCalib_b = 382.7
+    globalCalib_c = 1756.0
+    globalCalib_t = -0.6598
 
     pixelCalib_file = "%s/eos/clicdp/data/VertexCalibration/LatestResults/L04-W0125_KDECalibration_Pixels.root" %home
     pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
 
 elif Assembly == "C04-W0110":
     print "Taking calibration constants for C04-W0110"
-    globalCalib_a = 6.028
-    globalCalib_b = 1310.0
-    globalCalib_c = 55190.0
-    globalCalib_t = -43.28
+    globalCalib_a = 14.1
+    globalCalib_b = 292.3
+    globalCalib_c = 780.2
+    globalCalib_t = 1.074
 
     pixelCalib_file = "%s/eos/clicdp/data/VertexCalibration/LatestResults/C04-W0110_KDECalibration_Pixels.root" %home
     pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
