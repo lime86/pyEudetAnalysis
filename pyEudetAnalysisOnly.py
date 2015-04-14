@@ -249,17 +249,15 @@ last_time = time.time()
 
 
 if (method_name == "EtaCorrection") :
-    ressigmachargeX, ressigmachargeY = FindSigmaMin(aDataSet,aDataSet.p_nEntries,10, dutID)
-    print "ressigmachargeX : %f"%float(ressigmachargeX)
-    print "ressigmachargeY : %f"%float(ressigmachargeY)
+    ressigmacharge = FindSigmaMin(aDataSet,aDataSet.p_nEntries,10,dutID)
+    print "ressigmacharge : %f"%float(ressigmacharge)
 
 else: 
-    ressigmachargeX=0.01
-    ressigmachargeY=0.01
+    ressigmacharge=0.01
 
 for i in range(n_proc-1) :
     aDataSet.FindMatchedCluster(i,0.1,dutID)
-    aDataSet.ComputePosition(i,method_name,(ressigmachargeX+ressigmachargeY)/2.0)
+    aDataSet.ComputePosition(i,method_name,ressigmacharge)
     m,me = aDataSet.ComputeResiduals(i, dutID)
     n_matched_in_main += m
     n_matched_in_edge += me

@@ -22,8 +22,8 @@ def shiftLat(sigma_tmp,Qrel_tmp):
 # first parameter: sigma of the eta correction (charge sharing)
 # second parameter: relative charge Qrel = (charge of the pixel with the highest energy)/(total charge of the cluster)
 #
-def shiftDiag(sigmaX_tmp,sigmaY_tmp,Qrel_tmp):
-    return sigmaX_tmp*TMath.ErfInverse(2.*Qrel_tmp-1.)*1./sqrt(2.),sigmaY_tmp*TMath.ErfInverse(2.*Qrel_tmp-1.)*1./sqrt(2.)
+def shiftDiag(sigma_tmp,Qrel_tmp):
+    return sigma_tmp*TMath.ErfInverse(2.*Qrel_tmp-1.)*1./sqrt(2.),sigma_tmp*TMath.ErfInverse(2.*Qrel_tmp-1.)*1./sqrt(2.)
 
 
 
@@ -154,7 +154,7 @@ class Cluster:
 #
 #compute the hit position as the Qweighted method but adding an eta correction du to the charge sharing between the fired pixels
 #
-    def GetEtaCorrectedQWeightedCentroid(self,sigmaX=0.003,sigmaY=0.003) :
+    def GetEtaCorrectedQWeightedCentroid(self,sigma=0.003) :
 
         self.relX = -1000
         self.relY = -1000
@@ -166,14 +166,14 @@ class Cluster:
             if(self.sizeX==2 and self.sizeY==1) :
                 # cluster size 2x1
                 Qrel = self.tot[self.col.index(min(self.col))] / self.totalTOT
-                self.relX = max(self.col)*pitchX - shiftLat(sigmaX,Qrel)
+                self.relX = max(self.col)*pitchX - shiftLat(sigma,Qrel)
                 self.relY = self.row[0]*pitchY + pitchY/2.
 
             elif(self.sizeX==1 and self.sizeY==2) :
                 # cluster size 1x2
                 Qrel = self.tot[self.row.index(min(self.row))] / self.totalTOT
                 self.relX = self.col[0]*pitchX + pitchX/2.
-                self.relY = max(self.row)*pitchY - shiftLat(sigmaY,Qrel)
+                self.relY = max(self.row)*pitchY - shiftLat(sigma,Qrel)
 
             elif(self.sizeX==2 and self.sizeY==2) :
                 # cluster size 2 with sizeX = 2 and sizeY = 2 i.e. 2 pixels on a diagonal
@@ -194,8 +194,8 @@ class Cluster:
                 Qrel1 = self.tot[bottomlefti] / (self.tot[bottomlefti] + self.tot[toprighti])
                 Qrel2 = self.tot[bottomrighti] / (self.tot[bottomrighti] + self.tot[toplefti])
 
-                shift1X,shift1Y = shiftDiag(sigmaX,sigmaY,Qrel1)
-                shift2X,shift2Y = shiftDiag(sigmaX,sigmaY,Qrel2)
+                shift1X,shift1Y = shiftDiag(sigma,Qrel1)
+                shift2X,shift2Y = shiftDiag(sigma,Qrel2)
 
                 self.relX = max(self.col)*pitchX - shift1X - shift2X
                 self.relY = max(self.row)*pitchY - shift1Y + shift2Y
@@ -232,8 +232,8 @@ class Cluster:
                 Qrel1 = self.tot[bottomlefti] / (self.tot[bottomlefti] + self.tot[toprighti])
                 Qrel2 = self.tot[bottomrighti] / (self.tot[bottomrighti] + self.tot[toplefti])
 
-                shift1X,shift1Y = shiftDiag(sigmaX,sigmaY,Qrel1)
-                shift2X,shift2Y = shiftDiag(sigmaX,sigmaY,Qrel2)
+                shift1X,shift1Y = shiftDiag(sigma,Qrel1)
+                shift2X,shift2Y = shiftDiag(sigma,Qrel2)
 
                 self.relX = max(self.col)*pitchX - shift1X - shift2X
                 self.relY = max(self.row)*pitchY - shift1Y + shift2Y
