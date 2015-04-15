@@ -1236,14 +1236,15 @@ def calculateEtaCorrSigma(V_B, V_D, thickness, temperature):
     # The diffusion sigma is in [mum]
 
     z=0 # Depth [cm] at which sigma is calculated
-    depletionWidth=thickness*TMath.Sqrt(V_B/V_D) # [cm]
+    depletionDepth=thickness*TMath.Sqrt(V_B/V_D) # [cm]
+    print "Depletion Depth=", depletionDepth
     
-    if(depletionWith <= thickness): # under depleted sensor
-        z=depletionWith
+    if(depletionDepth <= thickness): # under depleted sensor
+        z=depletionDepth
     else: # (Over)-depleted sensor
         z=thickness
 
-    return (TMath.Sqrt((TMath.K()*temperature*thickness*thickness/(echarge*V_D))*TMath.Log((V_B+V_D)/(V_B+V_D-2.0*V_D*z/thickness))))*10000. # [mum]
+    return TMath.Sqrt((TMath.K()*temperature*thickness*thickness/(echarge*V_D))*TMath.Log((V_B+V_D)/(V_B+V_D-2.0*V_D*z/thickness))) # [cm]
 
 ###############################################################################################################################
 #
