@@ -715,7 +715,7 @@ def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0
 #param 3: number of skiped events (compute residuals for 1 event over 'skip' events)
 #param 4: position of the device under test in the list of planes
 #
-def TotalSigmaFunctionX(sigmaCharge_tmp_X,sigmaCharge_tmp_Y,dataSet,skip,dut=6):
+def TotalSigmaFunctionX(sigmaCharge_tmp,dataSet,skip,dut=6):
 
     tmpx = TH1D("resX_2","Unbiased residual X, cluster size Y = 2",300,-0.150,0.150)
     
@@ -726,7 +726,7 @@ def TotalSigmaFunctionX(sigmaCharge_tmp_X,sigmaCharge_tmp_Y,dataSet,skip,dut=6):
                 if track.cluster!=-11 and len(dataSet.AllClusters[j])!=0 :
                     aCluster = dataSet.AllClusters[j][track.cluster]
                     if(aCluster.sizeX==2 and aCluster.sizeY==1) :
-                        aCluster.GetEtaCorrectedQWeightedCentroid(fabs(sigmaCharge_tmp_X),fabs(sigmaCharge_tmp_Y))
+                        aCluster.GetEtaCorrectedQWeightedCentroid(sigmaCharge_tmp)
                         dataSet.ComputeResiduals(j, dut)
                         tmpx.Fill(aCluster.resX)
 
@@ -772,7 +772,7 @@ def TotalSigmaFunctionX(sigmaCharge_tmp_X,sigmaCharge_tmp_Y,dataSet,skip,dut=6):
 #param 3: number of skiped events (compute residuals for 1 event over 'skip' events)
 #param 4: position of the device under test in the list of planes
 #
-def TotalSigmaFunctionY(sigmaCharge_tmp_Y,sigmaCharge_tmp_X,dataSet,skip,dut=6):
+def TotalSigmaFunctionY(sigmaCharge_tmp,dataSet,skip,dut=6):
     
     tmpy = TH1D("resY_1","Unbiased residual Y, cluster size Y = 2",300,-0.150,0.150)
     for j,tracks in enumerate(dataSet.AllTracks) :
@@ -781,7 +781,7 @@ def TotalSigmaFunctionY(sigmaCharge_tmp_Y,sigmaCharge_tmp_X,dataSet,skip,dut=6):
                 if track.cluster!=-11 and len(dataSet.AllClusters[j])!=0 :
                     aCluster = dataSet.AllClusters[j][track.cluster]
                     if(aCluster.sizeY==2 and aCluster.sizeX==1) :
-                        aCluster.GetEtaCorrectedQWeightedCentroid(fabs(sigmaCharge_tmp_X),fabs(sigmaCharge_tmp_Y))
+                        aCluster.GetEtaCorrectedQWeightedCentroid(sigmaCharge_tmp)
                         dataSet.ComputeResiduals(j, dut)
                         tmpy.Fill(aCluster.resY)
 
@@ -980,8 +980,8 @@ def FindSigmaMin(dataSet,nevent,skip=1, dut=6) :
     for sigmaint in range(sigmaint_max) :
     	sigma=sigmaint*1e-4
         
-    	resX=TotalSigmaFunctionX(sigma,sigma,dataSet,skip, dut)
-    	resY=TotalSigmaFunctionY(sigma,sigma,dataSet,skip, dut)
+    	resX=TotalSigmaFunctionX(sigma,dataSet,skip,dut)
+    	resY=TotalSigmaFunctionY(sigma,dataSet,skip,dut)
 	res=resX/2.0+resY/2.0
 	
 	if (res < bestres) : 
@@ -993,7 +993,7 @@ def FindSigmaMin(dataSet,nevent,skip=1, dut=6) :
                 blah = raw_input()
 
     print "Best sigma found: %f um, giving resolution: %f um" %(bestsigma*1000,bestres*1000)
-    return bestsigma,bestsigma
+    return bestsigma
 
 
 def ApplyAlignment(dataSet,translations,rotations,dut=6,filename="Alignment.txt") :

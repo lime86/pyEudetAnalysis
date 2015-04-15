@@ -307,7 +307,10 @@ class EudetData:
                         self.p_energyPbPC.append(0.)
                 else:
                     self.p_energyPbPC.append(0.)
-                    
+        else:
+            for tot,col,row in zip(self.p_tot,self.p_col,self.p_row) :
+                self.p_energyGC.append(0.)
+                self.p_energyPbPC.append(0.)      
 
  #       for index,totvalue in enumerate(self.p_tot) :
  #           self.p_tot[index]=float(totvalue)/self.scale
@@ -889,7 +892,7 @@ class EudetData:
                 elif (method=="maxTOT"):
                     cluster.GetMaxTOTCentroid()
                 elif (method=="EtaCorrection"):
-                    cluster.GetEtaCorrectedQWeightedCentroid(sigma,sigma)
+                    cluster.GetEtaCorrectedQWeightedCentroid(sigma)
 
 
 
@@ -961,7 +964,7 @@ class EudetData:
             elif (method=="maxTOT"):
                 cluster.GetMaxTOTCentroid()
             elif (method=="EtaCorrection"):
-                cluster.GetEtaCorrectedQWeightedCentroid(sigma,sigma)
+                cluster.GetEtaCorrectedQWeightedCentroid(sigma)
 
             cluster.id=clusterid
             clusterid+=1
