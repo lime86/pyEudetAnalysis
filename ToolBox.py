@@ -715,7 +715,7 @@ def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0
 #param 3: number of skiped events (compute residuals for 1 event over 'skip' events)
 #param 4: position of the device under test in the list of planes
 #
-def TotalSigmaFunctionX(sigmaCharge_tmp,dataSet,skip,dut=6):
+def TotalSigmaFunctionX(sigmaCharge_tmp,dataSet,skip,dut=6,mode="tot"):
 
     tmpx = TH1D("resX_2","Unbiased residual X, cluster size Y = 2",300,-0.150,0.150)
     
@@ -726,9 +726,18 @@ def TotalSigmaFunctionX(sigmaCharge_tmp,dataSet,skip,dut=6):
                 if track.cluster!=-11 and len(dataSet.AllClusters[j])!=0 :
                     aCluster = dataSet.AllClusters[j][track.cluster]
                     if(aCluster.sizeX==2 and aCluster.sizeY==1) :
-                        aCluster.GetEtaCorrectedQWeightedCentroid(sigmaCharge_tmp)
-                        dataSet.ComputeResiduals(j, dut)
-                        tmpx.Fill(aCluster.resX)
+                        if mode == "tot":
+                            aCluster.GetEtaCorrectedQWeightedCentroid(sigmaCharge_tmp)
+                            dataSet.ComputeResiduals(j, dut)
+                            tmpx.Fill(aCluster.resX)
+                        elif mode == "gc":
+                            aCluster.GetEtaCorrectedQWeightedCentroid(0.0,sigmaCharge_tmp)
+                            dataSet.ComputeResiduals(j, dut)
+                            tmpx.Fill(aCluster.resX_energyGC)
+                        elif mode == "pbpc":
+                            aCluster.GetEtaCorrectedQWeightedCentroid(0.0,0.0,sigmaCharge_tmp)
+                            dataSet.ComputeResiduals(j, dut)
+                            tmpx.Fill(aCluster.resX_energyPbPC)
 
 #     for i in range(dataSet.p_nEntries) :
 #         if i%skip==0 :
@@ -772,7 +781,7 @@ def TotalSigmaFunctionX(sigmaCharge_tmp,dataSet,skip,dut=6):
 #param 3: number of skiped events (compute residuals for 1 event over 'skip' events)
 #param 4: position of the device under test in the list of planes
 #
-def TotalSigmaFunctionY(sigmaCharge_tmp,dataSet,skip,dut=6):
+def TotalSigmaFunctionY(sigmaCharge_tmp,dataSet,skip,dut=6,mode="tot"):
     
     tmpy = TH1D("resY_1","Unbiased residual Y, cluster size Y = 2",300,-0.150,0.150)
     for j,tracks in enumerate(dataSet.AllTracks) :
@@ -781,9 +790,18 @@ def TotalSigmaFunctionY(sigmaCharge_tmp,dataSet,skip,dut=6):
                 if track.cluster!=-11 and len(dataSet.AllClusters[j])!=0 :
                     aCluster = dataSet.AllClusters[j][track.cluster]
                     if(aCluster.sizeY==2 and aCluster.sizeX==1) :
-                        aCluster.GetEtaCorrectedQWeightedCentroid(sigmaCharge_tmp)
-                        dataSet.ComputeResiduals(j, dut)
-                        tmpy.Fill(aCluster.resY)
+                        if mode=="tot":
+                            aCluster.GetEtaCorrectedQWeightedCentroid(sigmaCharge_tmp)
+                            dataSet.ComputeResiduals(j, dut)
+                            tmpy.Fill(aCluster.resY)
+                        elif mode=="gc":
+                            aCluster.GetEtaCorrectedQWeightedCentroid(0.0,sigmaCharge_tmp)
+                            dataSet.ComputeResiduals(j, dut)
+                            tmpy.Fill(aCluster.resY_energyGC)
+                        elif mode=="pbpc":
+                            aCluster.GetEtaCorrectedQWeightedCentroid(0.0,0.0,sigmaCharge_tmp)
+                            dataSet.ComputeResiduals(j, dut)
+                            tmpy.Fill(aCluster.resY_energyPbPC)
 
 #     for i in range(dataSet.p_nEntries) :
 #         if i%skip==0 :
@@ -980,8 +998,8 @@ def FindSigmaMin(dataSet,nevent,skip=1, dut=6) :
     for sigmaint in range(sigmaint_max) :
     	sigma=sigmaint*1e-4
         
-    	resX=TotalSigmaFunctionX(sigma,dataSet,skip,dut)
-    	resY=TotalSigmaFunctionY(sigma,dataSet,skip,dut)
+    	resX=TotalSigmaFunctionX(sigma,dataSet,skip,dut,"tot")
+    	resY=TotalSigmaFunctionY(sigma,dataSet,skip,dut,"tot")
 	res=resX/2.0+resY/2.0
 	
 	if (res < bestres) : 
@@ -992,8 +1010,46 @@ def FindSigmaMin(dataSet,nevent,skip=1, dut=6) :
                 print "Press any key to continue, ctrl+D to exit"
                 blah = raw_input()
 
+    bestsigmaGC=1000
+    bestresGC=1000
+    sigmaintGC_max = 500
+    for sigmaintGC in range(sigmaintGC_max) :
+    	sigmaGC=sigmaintGC*1e-4
+        
+    	resXGC=TotalSigmaFunctionX(sigmaGC,dataSet,skip,dut,"gc")
+    	resYGC=TotalSigmaFunctionY(sigmaGC,dataSet,skip,dut,"gc")
+	resGC=resXGC/2.0+resYGC/2.0
+	
+	if (resGC < bestresGC) : 
+            bestresGC=resGC
+            bestsigmaGC=sigmaGC
+            if sigmaintGC == (sigmaintGC_max-1):
+                print "WARNING sigmaGC optimisation hit limit. Adjust limit."
+                print "Press any key to continue, ctrl+D to exit"
+                blah = raw_input()
+
+    bestsigmaPbPC=1000
+    bestresPbPC=1000
+    sigmaintPbPC_max = 500
+    for sigmaintPbPC in range(sigmaintPbPC_max) :
+    	sigmaPbPC=sigmaintPbPC*1e-4
+        
+    	resXPbPC=TotalSigmaFunctionX(sigmaPbPC,dataSet,skip,dut,"pbpc")
+    	resYPbPC=TotalSigmaFunctionY(sigmaPbPC,dataSet,skip,dut,"pbpc")
+	resPbPC=resXPbPC/2.0+resYPbPC/2.0
+	
+	if (resPbPC < bestresPbPC) : 
+            bestresPbPC=resPbPC
+            bestsigmaPbPC=sigmaPbPC
+            if sigmaintPbPC == (sigmaintPbPC_max-1):
+                print "WARNING sigmaPbPC optimisation hit limit. Adjust limit."
+                print "Press any key to continue, ctrl+D to exit"
+                blah = raw_input()
+
     print "Best sigma found: %f um, giving resolution: %f um" %(bestsigma*1000,bestres*1000)
-    return bestsigma
+    print "Best sigmaGC found: %f um, giving resolution: %f um" %(bestsigmaGC*1000,bestresGC*1000)
+    print "Best sigmaPbPC found: %f um, giving resolution: %f um" %(bestsigmaPbPC*1000,bestresPbPC*1000)
+    return bestsigma, bestsigmaGC, bestsigmaPbPC
 
 
 def ApplyAlignment(dataSet,translations,rotations,dut=6,filename="Alignment.txt") :
