@@ -96,7 +96,7 @@ else :
     exit()
 
 future_builtins.SensorType= "Timepix"
-if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
+if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix" or options.SENSOR=="FEI4"):
     future_builtins.SensorType=options.SENSOR
 else :
     print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"

@@ -83,7 +83,7 @@ else :
     parser.print_help()
     exit()
 
-if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
+if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix" or options.SENSOR=="FEI4"):
     future_builtins.SensorType=options.SENSOR
 else :
     print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
@@ -106,9 +106,7 @@ else :
 os.system("mkdir %s/Run%i"%(PlotPath,RunNumber))
 
 from ROOT import *
-import ROOT
-from ROOT import gStyle
-from ROOT import TMath
+
 from ToolBox import *
 import pyximport; pyximport.install(pyimport=True)
 from EudetData import *

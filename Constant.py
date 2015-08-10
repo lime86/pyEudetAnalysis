@@ -40,6 +40,17 @@ if "Timepix" in SensorType :
     npix_Y = 256
     
     print "Using Timepix or Timepix3 detector"
+
+
+elif SensorType=="FEI4" : 
+# CLICPix Specifications
+    pitchX = 0.250
+    pitchY = 0.050
+    npix_X = 80
+    npix_Y = 336
+    
+    print "Using FEI4 detector"
+
     
 
 elif SensorType=="CLICpix" : 
