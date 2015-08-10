@@ -50,14 +50,31 @@ class Cluster:
     relX = 0.
     relY = 0.
     relZ = 0.
+    relX_energyGC = 0.
+    relY_energyGC = 0.
+    relZ_energyGC = 0.
+    relX_energyPbPC = 0.
+    relY_energyPbPC = 0.
+    relZ_energyPbPC = 0.
 
     # telescope coordinates
     absX =-10000.
     absY =-10000.
     absZ =-10000.
+    absX_energyGC =-10000.
+    absY_energyGC =-10000.
+    absZ_energyGC =-10000.
+    absX_energyPbPC =-10000.
+    absY_energyPbPC =-10000.
+    absZ_energyPbPC =-10000.
 
     resX = -10000.
     resY = -10000.
+    resX_energyGC = -10000.
+    resY_energyGC = -10000.
+    resX_energyPbPC = -10000.
+    resY_energyPbPC = -10000.
+
     id = 0
 
     # track number
@@ -101,6 +118,10 @@ class Cluster:
     def GetQWeightedCentroid(self) :
         self.relX=0.
         self.relY=0.
+        self.relX_energyGC=0.
+        self.relY_energyGC=0.
+        self.relX_energyPbPC=0.
+        self.relY_energyPbPC=0.
 
         if(self.totalTOT==0):
             self.GetDigitalCentroid()
@@ -115,6 +136,31 @@ class Cluster:
             self.absX=self.relX - npix_X*pitchX/2.
             self.absY=self.relY - npix_Y*pitchY/2.
             self.absZ=0
+
+            for index,energyGC_tmp in enumerate(self.energyGC) :
+                self.relX_energyGC+=(self.col[index]*pitchX)*energyGC_tmp
+                self.relY_energyGC+=(self.row[index]*pitchY)*energyGC_tmp
+
+            self.relX_energyGC = self.relX_energyGC/self.totalEnergyGC + pitchX/2.
+            self.relY_energyGC = self.relY_energyGC/self.totalEnergyGC + pitchY/2.
+
+            self.absX_energyGC=self.relX_energyGC - npix_X*pitchX/2.
+            self.absY_energyGC=self.relY_energyGC - npix_Y*pitchY/2.
+            self.absZ_energyGC=0
+
+        if(self.totalEnergyPbPC==0):
+            self.GetDigitalCentroid()
+        else:
+            for index,energyPbPC_tmp in enumerate(self.energyPbPC) :
+                self.relX_energyPbPC+=(self.col[index]*pitchX)*energyPbPC_tmp
+                self.relY_energyPbPC+=(self.row[index]*pitchY)*energyPbPC_tmp
+
+            self.relX_energyPbPC = self.relX_energyPbPC/self.totalEnergyPbPC + pitchX/2.
+            self.relY_energyPbPC = self.relY_energyPbPC/self.totalEnergyPbPC + pitchY/2.
+
+            self.absX_energyPbPC=self.relX_energyPbPC - npix_X*pitchX/2.
+            self.absY_energyPbPC=self.relY_energyPbPC - npix_Y*pitchY/2.
+            self.absZ_energyPbPC=0
 
 #
 #compute the hit position as the mean of the fired pixels positions (digital method)
@@ -154,12 +200,20 @@ class Cluster:
 #
 #compute the hit position as the Qweighted method but adding an eta correction du to the charge sharing between the fired pixels
 #
-    def GetEtaCorrectedQWeightedCentroid(self,sigma=0.003) :
+    def GetEtaCorrectedQWeightedCentroid(self,sigma=0.003,sigmaGC=0.003,sigmaPbPC=0.003) :
 
         self.relX = -1000
         self.relY = -1000
         self.absX = -1000
         self.absY = -1000
+        self.relX_energyGC = -1000
+        self.relY_energyGC = -1000
+        self.absX_energyGC = -1000
+        self.absY_energyGC = -1000
+        self.relX_energyPbPC = -1000
+        self.relY_energyPbPC = -1000
+        self.absX_energyPbPC = -1000
+        self.absY_energyPbPC = -1000
 
 
         if(self.size==2) :
@@ -169,11 +223,29 @@ class Cluster:
                 self.relX = max(self.col)*pitchX - shiftLat(sigma,Qrel)
                 self.relY = self.row[0]*pitchY + pitchY/2.
 
+                Qrel_energyGC = self.energyGC[self.col.index(min(self.col))] / self.totalEnergyGC
+                self.relX_energyGC = max(self.col)*pitchX - shiftLat(sigmaGC,Qrel_energyGC)
+                self.relY_energyGC = self.row[0]*pitchY + pitchY/2.
+
+                if ((self.totalEnergyPbPC > 0) and (0 not in self.energyPbPC)):
+                    Qrel_energyPbPC = self.energyPbPC[self.col.index(min(self.col))] / self.totalEnergyPbPC
+                    self.relX_energyPbPC = max(self.col)*pitchX - shiftLat(sigmaPbPC,Qrel_energyPbPC)
+                    self.relY_energyPbPC = self.row[0]*pitchY + pitchY/2.
+
             elif(self.sizeX==1 and self.sizeY==2) :
                 # cluster size 1x2
                 Qrel = self.tot[self.row.index(min(self.row))] / self.totalTOT
                 self.relX = self.col[0]*pitchX + pitchX/2.
                 self.relY = max(self.row)*pitchY - shiftLat(sigma,Qrel)
+                
+                Qrel_energyGC = self.energyGC[self.row.index(min(self.row))] / self.totalEnergyGC
+                self.relX_energyGC = self.col[0]*pitchX + pitchX/2.
+                self.relY_energyGC = max(self.row)*pitchY - shiftLat(sigmaGC,Qrel_energyGC)
+
+                if ((self.totalEnergyPbPC > 0) and (0 not in self.energyPbPC)):
+                    Qrel_energyPbPC = self.energyPbPC[self.row.index(min(self.row))] / self.totalEnergyPbPC
+                    self.relX_energyPbPC = self.col[0]*pitchX + pitchX/2.
+                    self.relY_energyPbPC = max(self.row)*pitchY - shiftLat(sigmaPbPC,Qrel_energyPbPC)
 
             elif(self.sizeX==2 and self.sizeY==2) :
                 # cluster size 2 with sizeX = 2 and sizeY = 2 i.e. 2 pixels on a diagonal
@@ -200,6 +272,25 @@ class Cluster:
                 self.relX = max(self.col)*pitchX - shift1X - shift2X
                 self.relY = max(self.row)*pitchY - shift1Y + shift2Y
 
+                Qrel1_energyGC = self.energyGC[bottomlefti] / (self.energyGC[bottomlefti] + self.energyGC[toprighti])
+                Qrel2_energyGC = self.energyGC[bottomrighti] / (self.energyGC[bottomrighti] + self.energyGC[toplefti])
+
+                shift1X_GC,shift1Y_GC = shiftDiag(sigmaGC,Qrel1_energyGC)
+                shift2X_GC,shift2Y_GC = shiftDiag(sigmaGC,Qrel2_energyGC)
+
+                self.relX_energyGC = max(self.col)*pitchX - shift1X_GC - shift2X_GC
+                self.relY_energyGC = max(self.row)*pitchY - shift1Y_GC + shift2Y_GC
+
+                if ((self.totalEnergyPbPC > 0) and (0 not in self.energyPbPC)):
+                    Qrel1_energyPbPC = self.energyPbPC[bottomlefti] / (self.energyPbPC[bottomlefti] + self.energyPbPC[toprighti])
+                    Qrel2_energyPbPC = self.energyPbPC[bottomrighti] / (self.energyPbPC[bottomrighti] + self.energyPbPC[toplefti])
+
+                    shift1X_PbPC,shift1Y_PbPC = shiftDiag(sigmaPbPC,Qrel1_energyPbPC)
+                    shift2X_PbPC,shift2Y_PbPC = shiftDiag(sigmaPbPC,Qrel2_energyPbPC)
+
+                    self.relX_energyPbPC = max(self.col)*pitchX - shift1X_PbPC - shift2X_PbPC
+                    self.relY_energyPbPC = max(self.row)*pitchY - shift1Y_PbPC + shift2Y_PbPC
+
             else : # not 2x2 -> using the simple Qweighted centroid
                 self.GetQWeightedCentroid()
 
@@ -210,6 +301,8 @@ class Cluster:
                 orig_row = list(self.row)
                 orig_col = list(self.col)
                 orig_tot = list(self.tot)
+                orig_energyGC = list(self.energyGC)
+                orig_energyPbPC = list(self.energyPbPC)
 
                 # calculate and add missing pixel
                 for i in xrange(len(self.row)):
@@ -218,6 +311,8 @@ class Cluster:
                     if self.col.count(self.col[i]) == 1:
                         self.col.append(self.col[i])
                         self.tot.append(1.0)
+                        self.energyGC.append(1.0)
+                        self.energyPbPC.append(1.0)
 
                 # proceed as 4 cluster case
                 for i in xrange(len(self.row)):
@@ -238,10 +333,31 @@ class Cluster:
                 self.relX = max(self.col)*pitchX - shift1X - shift2X
                 self.relY = max(self.row)*pitchY - shift1Y + shift2Y
 
+                Qrel1_energyGC = self.energyGC[bottomlefti] / (self.energyGC[bottomlefti] + self.energyGC[toprighti])
+                Qrel2_energyGC = self.energyGC[bottomrighti] / (self.energyGC[bottomrighti] + self.energyGC[toplefti])
+
+                shift1X_GC,shift1Y_GC = shiftDiag(sigmaGC,Qrel1_energyGC)
+                shift2X_GC,shift2Y_GC = shiftDiag(sigmaGC,Qrel2_energyGC)
+
+                self.relX_energyGC = max(self.col)*pitchX - shift1X_GC - shift2X_GC
+                self.relY_energyGC = max(self.row)*pitchY - shift1Y_GC + shift2Y_GC
+
+                if ((self.totalEnergyPbPC > 0) and (0 not in self.energyPbPC)):
+                    Qrel1_energyPbPC = self.energyPbPC[bottomlefti] / (self.energyPbPC[bottomlefti] + self.energyPbPC[toprighti])
+                    Qrel2_energyPbPC = self.energyPbPC[bottomrighti] / (self.energyPbPC[bottomrighti] + self.energyPbPC[toplefti])
+
+                    shift1X_PbPC,shift1Y_PbPC = shiftDiag(sigmaPbPC,Qrel1_energyPbPC)
+                    shift2X_PbPC,shift2Y_PbPC = shiftDiag(sigmaPbPC,Qrel2_energyPbPC)
+
+                    self.relX_energyPbPC = max(self.col)*pitchX - shift1X_PbPC - shift2X_PbPC
+                    self.relY_energyPbPC = max(self.row)*pitchY - shift1Y_PbPC + shift2Y_PbPC
+
                 # put back original row, col, tot
                 self.row = orig_row
                 self.col = orig_col
                 self.tot = orig_tot
+                self.energyGC = orig_energyGC
+                self.energyPbPC = orig_energyPbPC
 
             else : # not 2x2 -> using the simple Qweighted centroid
                 self.GetQWeightedCentroid()
@@ -254,6 +370,12 @@ class Cluster:
         self.absX = self.relX - npix_X*pitchX/2.
         self.absY = self.relY - npix_Y*pitchY/2.
         self.absZ = 0
+        self.absX_energyGC = self.relX_energyGC - npix_X*pitchX/2.
+        self.absY_energyGC = self.relY_energyGC - npix_Y*pitchY/2.
+        self.absZ_energyGC = 0
+        self.absX_energyPbPC = self.relX_energyPbPC - npix_X*pitchX/2.
+        self.absY_energyPbPC = self.relY_energyPbPC - npix_Y*pitchY/2.
+        self.absZ_energyPbPC = 0
 
 
         if (self.relX == -1000 or self.relY == -1000 or self.absX == -1000 or self.absY == -1000):
@@ -265,6 +387,10 @@ class Cluster:
     def GetResiduals(self,x,y) :
         self.resX = self.absX-(x)
         self.resY = self.absY-(y)
+        self.resX_energyGC = self.absX_energyGC-(x)
+        self.resY_energyGC = self.absY_energyGC-(y)
+        self.resX_energyPbPC = self.absX_energyPbPC-(x)
+        self.resY_energyPbPC = self.absY_energyPbPC-(y)
 
 
     def GetPixelResiduals(self,trackx,tracky) :
