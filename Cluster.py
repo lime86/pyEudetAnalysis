@@ -137,6 +137,7 @@ class Cluster:
             self.absY=self.relY - npix_Y*pitchY/2.
             self.absZ=0
 
+        if ((self.totalEnergyGC > 0) and (0 not in self.energyGC)):
             for index,energyGC_tmp in enumerate(self.energyGC) :
                 self.relX_energyGC+=(self.col[index]*pitchX)*energyGC_tmp
                 self.relY_energyGC+=(self.row[index]*pitchY)*energyGC_tmp
@@ -148,9 +149,7 @@ class Cluster:
             self.absY_energyGC=self.relY_energyGC - npix_Y*pitchY/2.
             self.absZ_energyGC=0
 
-        if(self.totalEnergyPbPC==0):
-            self.GetDigitalCentroid()
-        else:
+        if ((self.totalEnergyPbPC > 0) and (0 not in self.energyPbPC)):
             for index,energyPbPC_tmp in enumerate(self.energyPbPC) :
                 self.relX_energyPbPC+=(self.col[index]*pitchX)*energyPbPC_tmp
                 self.relY_energyPbPC+=(self.row[index]*pitchY)*energyPbPC_tmp
@@ -223,9 +222,10 @@ class Cluster:
                 self.relX = max(self.col)*pitchX - shiftLat(sigma,Qrel)
                 self.relY = self.row[0]*pitchY + pitchY/2.
 
-                Qrel_energyGC = self.energyGC[self.col.index(min(self.col))] / self.totalEnergyGC
-                self.relX_energyGC = max(self.col)*pitchX - shiftLat(sigmaGC,Qrel_energyGC)
-                self.relY_energyGC = self.row[0]*pitchY + pitchY/2.
+                if ((self.totalEnergyGC > 0) and (0 not in self.energyGC)):
+                    Qrel_energyGC = self.energyGC[self.col.index(min(self.col))] / self.totalEnergyGC
+                    self.relX_energyGC = max(self.col)*pitchX - shiftLat(sigmaGC,Qrel_energyGC)
+                    self.relY_energyGC = self.row[0]*pitchY + pitchY/2.
 
                 if ((self.totalEnergyPbPC > 0) and (0 not in self.energyPbPC)):
                     Qrel_energyPbPC = self.energyPbPC[self.col.index(min(self.col))] / self.totalEnergyPbPC
@@ -238,9 +238,10 @@ class Cluster:
                 self.relX = self.col[0]*pitchX + pitchX/2.
                 self.relY = max(self.row)*pitchY - shiftLat(sigma,Qrel)
                 
-                Qrel_energyGC = self.energyGC[self.row.index(min(self.row))] / self.totalEnergyGC
-                self.relX_energyGC = self.col[0]*pitchX + pitchX/2.
-                self.relY_energyGC = max(self.row)*pitchY - shiftLat(sigmaGC,Qrel_energyGC)
+                if ((self.totalEnergyGC > 0) and (0 not in self.energyGC)):
+                    Qrel_energyGC = self.energyGC[self.row.index(min(self.row))] / self.totalEnergyGC
+                    self.relX_energyGC = self.col[0]*pitchX + pitchX/2.
+                    self.relY_energyGC = max(self.row)*pitchY - shiftLat(sigmaGC,Qrel_energyGC)
 
                 if ((self.totalEnergyPbPC > 0) and (0 not in self.energyPbPC)):
                     Qrel_energyPbPC = self.energyPbPC[self.row.index(min(self.row))] / self.totalEnergyPbPC
@@ -272,14 +273,15 @@ class Cluster:
                 self.relX = max(self.col)*pitchX - shift1X - shift2X
                 self.relY = max(self.row)*pitchY - shift1Y + shift2Y
 
-                Qrel1_energyGC = self.energyGC[bottomlefti] / (self.energyGC[bottomlefti] + self.energyGC[toprighti])
-                Qrel2_energyGC = self.energyGC[bottomrighti] / (self.energyGC[bottomrighti] + self.energyGC[toplefti])
+                if ((self.totalEnergyGC > 0) and (0 not in self.energyGC)):
+                    Qrel1_energyGC = self.energyGC[bottomlefti] / (self.energyGC[bottomlefti] + self.energyGC[toprighti])
+                    Qrel2_energyGC = self.energyGC[bottomrighti] / (self.energyGC[bottomrighti] + self.energyGC[toplefti])
 
-                shift1X_GC,shift1Y_GC = shiftDiag(sigmaGC,Qrel1_energyGC)
-                shift2X_GC,shift2Y_GC = shiftDiag(sigmaGC,Qrel2_energyGC)
+                    shift1X_GC,shift1Y_GC = shiftDiag(sigmaGC,Qrel1_energyGC)
+                    shift2X_GC,shift2Y_GC = shiftDiag(sigmaGC,Qrel2_energyGC)
 
-                self.relX_energyGC = max(self.col)*pitchX - shift1X_GC - shift2X_GC
-                self.relY_energyGC = max(self.row)*pitchY - shift1Y_GC + shift2Y_GC
+                    self.relX_energyGC = max(self.col)*pitchX - shift1X_GC - shift2X_GC
+                    self.relY_energyGC = max(self.row)*pitchY - shift1Y_GC + shift2Y_GC
 
                 if ((self.totalEnergyPbPC > 0) and (0 not in self.energyPbPC)):
                     Qrel1_energyPbPC = self.energyPbPC[bottomlefti] / (self.energyPbPC[bottomlefti] + self.energyPbPC[toprighti])
@@ -333,14 +335,15 @@ class Cluster:
                 self.relX = max(self.col)*pitchX - shift1X - shift2X
                 self.relY = max(self.row)*pitchY - shift1Y + shift2Y
 
-                Qrel1_energyGC = self.energyGC[bottomlefti] / (self.energyGC[bottomlefti] + self.energyGC[toprighti])
-                Qrel2_energyGC = self.energyGC[bottomrighti] / (self.energyGC[bottomrighti] + self.energyGC[toplefti])
+                if ((self.totalEnergyGC > 0) and (0 not in self.energyGC)):
+                    Qrel1_energyGC = self.energyGC[bottomlefti] / (self.energyGC[bottomlefti] + self.energyGC[toprighti])
+                    Qrel2_energyGC = self.energyGC[bottomrighti] / (self.energyGC[bottomrighti] + self.energyGC[toplefti])
 
-                shift1X_GC,shift1Y_GC = shiftDiag(sigmaGC,Qrel1_energyGC)
-                shift2X_GC,shift2Y_GC = shiftDiag(sigmaGC,Qrel2_energyGC)
+                    shift1X_GC,shift1Y_GC = shiftDiag(sigmaGC,Qrel1_energyGC)
+                    shift2X_GC,shift2Y_GC = shiftDiag(sigmaGC,Qrel2_energyGC)
 
-                self.relX_energyGC = max(self.col)*pitchX - shift1X_GC - shift2X_GC
-                self.relY_energyGC = max(self.row)*pitchY - shift1Y_GC + shift2Y_GC
+                    self.relX_energyGC = max(self.col)*pitchX - shift1X_GC - shift2X_GC
+                    self.relY_energyGC = max(self.row)*pitchY - shift1Y_GC + shift2Y_GC
 
                 if ((self.totalEnergyPbPC > 0) and (0 not in self.energyPbPC)):
                     Qrel1_energyPbPC = self.energyPbPC[bottomlefti] / (self.energyPbPC[bottomlefti] + self.energyPbPC[toprighti])
