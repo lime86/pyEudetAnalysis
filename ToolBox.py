@@ -1282,6 +1282,26 @@ def CountPixelMapRepeats(dataSet,n_proc):
     return histo_mapreps
 
 
+def calculateEtaCorrSigma(V_B, V_D, thickness, temperature):
+    # Calculates the sigma of diffusion
+    # V_B: bias voltage [V]
+    # V_D: depletion voltage [V]
+    # thickness of the sensor [cm]
+    # temperature: [K]
+    # TMath.K(): Boltzmann constant
+    # The diffusion sigma is in [mum]
+
+    z=0 # Depth [cm] at which sigma is calculated
+    depletionDepth=thickness*TMath.Sqrt(V_B/V_D) # [cm]
+    print "Depletion Depth=", depletionDepth
+    
+    if(depletionDepth <= thickness): # under depleted sensor
+        z=depletionDepth
+    else: # (Over)-depleted sensor
+        z=thickness
+
+    return TMath.Sqrt((TMath.K()*temperature*thickness*thickness/(echarge*V_D))*TMath.Log((V_B+V_D)/(V_B+V_D-2.0*V_D*z/thickness))) # [cm]
+
 ###############################################################################################################################
 #
 #                        landau * gauss fit tools
