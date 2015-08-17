@@ -250,10 +250,7 @@ last_time = time.time()
 
 
 if (method_name == "EtaCorrection") :
-    ressigmacharge, ressigmachargeGC, ressigmachargePbPC = FindSigmaMin(aDataSet,aDataSet.p_nEntries,10,dutID)
-    print "ressigmacharge : %f"%float(ressigmacharge)
-    print "ressigmachargeGC : %f"%float(ressigmachargeGC)
-    print "ressigmachargePbPC : %f"%float(ressigmachargePbPC)
+    ressigmacharge, ressigmachargeGC, ressigmachargePbPC = FindSigmaMin(aDataSet,aDataSet.p_nEntries,PlotPath,RunNumber,method_name,10, dutID)
 
 else: 
     ressigmacharge=0.01

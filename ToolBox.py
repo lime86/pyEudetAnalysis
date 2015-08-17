@@ -995,8 +995,8 @@ def Perform2StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
 #param 2: number of events we are running on
 #param 3: number of skiped events
 #
-def FindSigmaMin(dataSet,nevent,skip=1, dut=6) :
-    
+def FindSigmaMin(dataSet,nevent,PlotPath,RunNumber,method_name, skip=1, dut=6) :
+
     bestsigma=1000
     bestres=1000
     sigmaint_max = 500
@@ -1050,6 +1050,12 @@ def FindSigmaMin(dataSet,nevent,skip=1, dut=6) :
                 print "WARNING sigmaPbPC optimisation hit limit. Adjust limit."
                 print "Press any key to continue, ctrl+D to exit"
                 blah = raw_input()
+
+    f = open("%s/Run%i/%s/SigmaMin.txt"%(PlotPath,RunNumber,method_name),'w')
+    f.write("Best Sigma found : %f\n"%(bestsigma))
+    f.write("Best SigmaGC found : %f\n"%(bestsigmaGC))
+    f.write("Best SigmaPbPC found : %f\n"%(bestsigmaPbPC))
+    f.close()
 
     print "Best sigma found: %f um, giving resolution: %f um" %(bestsigma*1000,bestres*1000)
     print "Best sigmaGC found: %f um, giving resolution: %f um" %(bestsigmaGC*1000,bestresGC*1000)
