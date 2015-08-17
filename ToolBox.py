@@ -1015,41 +1015,47 @@ def FindSigmaMin(dataSet,nevent,PlotPath,RunNumber,method_name, skip=1, dut=6) :
                 print "Press any key to continue, ctrl+D to exit"
                 blah = raw_input()
 
-    bestsigmaGC=1000
-    bestresGC=1000
-    sigmaintGC_max = 500
-    for sigmaintGC in range(sigmaintGC_max) :
-    	sigmaGC=sigmaintGC*1e-4
-        
-    	resXGC=TotalSigmaFunctionX(sigmaGC,dataSet,skip,dut,"gc")
-    	resYGC=TotalSigmaFunctionY(sigmaGC,dataSet,skip,dut,"gc")
-	resGC=resXGC/2.0+resYGC/2.0
-	
-	if (resGC < bestresGC) : 
-            bestresGC=resGC
-            bestsigmaGC=sigmaGC
-            if sigmaintGC == (sigmaintGC_max-1):
-                print "WARNING sigmaGC optimisation hit limit. Adjust limit."
-                print "Press any key to continue, ctrl+D to exit"
-                blah = raw_input()
+    if future_builtins.Assembly=="AssemblyNotDefined":
+        bestsigmaGC = 0
+        bestresGC = 0
+        bestsigmaPbPC = 0
+        bestresPbPC = 0
+    else:
+        bestsigmaGC=1000
+        bestresGC=1000
+        sigmaintGC_max = 500
+        for sigmaintGC in range(sigmaintGC_max) :
+            sigmaGC=sigmaintGC*1e-4
 
-    bestsigmaPbPC=1000
-    bestresPbPC=1000
-    sigmaintPbPC_max = 500
-    for sigmaintPbPC in range(sigmaintPbPC_max) :
-    	sigmaPbPC=sigmaintPbPC*1e-4
-        
-    	resXPbPC=TotalSigmaFunctionX(sigmaPbPC,dataSet,skip,dut,"pbpc")
-    	resYPbPC=TotalSigmaFunctionY(sigmaPbPC,dataSet,skip,dut,"pbpc")
-	resPbPC=resXPbPC/2.0+resYPbPC/2.0
-	
-	if (resPbPC < bestresPbPC) : 
-            bestresPbPC=resPbPC
-            bestsigmaPbPC=sigmaPbPC
-            if sigmaintPbPC == (sigmaintPbPC_max-1):
-                print "WARNING sigmaPbPC optimisation hit limit. Adjust limit."
-                print "Press any key to continue, ctrl+D to exit"
-                blah = raw_input()
+            resXGC=TotalSigmaFunctionX(sigmaGC,dataSet,skip,dut,"gc")
+            resYGC=TotalSigmaFunctionY(sigmaGC,dataSet,skip,dut,"gc")
+            resGC=resXGC/2.0+resYGC/2.0
+
+            if (resGC < bestresGC) : 
+                bestresGC=resGC
+                bestsigmaGC=sigmaGC
+                if sigmaintGC == (sigmaintGC_max-1):
+                    print "WARNING sigmaGC optimisation hit limit. Adjust limit."
+                    print "Press any key to continue, ctrl+D to exit"
+                    blah = raw_input()
+
+        bestsigmaPbPC=1000
+        bestresPbPC=1000
+        sigmaintPbPC_max = 500
+        for sigmaintPbPC in range(sigmaintPbPC_max) :
+            sigmaPbPC=sigmaintPbPC*1e-4
+
+            resXPbPC=TotalSigmaFunctionX(sigmaPbPC,dataSet,skip,dut,"pbpc")
+            resYPbPC=TotalSigmaFunctionY(sigmaPbPC,dataSet,skip,dut,"pbpc")
+            resPbPC=resXPbPC/2.0+resYPbPC/2.0
+
+            if (resPbPC < bestresPbPC) : 
+                bestresPbPC=resPbPC
+                bestsigmaPbPC=sigmaPbPC
+                if sigmaintPbPC == (sigmaintPbPC_max-1):
+                    print "WARNING sigmaPbPC optimisation hit limit. Adjust limit."
+                    print "Press any key to continue, ctrl+D to exit"
+                    blah = raw_input()
 
     f = open("%s/Run%i/%s/SigmaMin.txt"%(PlotPath,RunNumber,method_name),'w')
     f.write("Best Sigma found : %f\n"%(bestsigma))
