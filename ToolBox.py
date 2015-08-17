@@ -834,28 +834,33 @@ def TotalSigmaFunctionY(sigmaCharge_tmp,dataSet,skip,dut=6,mode="tot"):
 
 
 
-def TotalDistanceFunction(parameters,aDataDet,nevents,skip,cutx = 0.1, cuty = 0.1,dut=6):
+def TotalDistanceFunction(parameters,aDataDet,nevents,skip,dut=6):
 
     totaldist_evaluator = 0.
     n = 0
-    for i,clusters in enumerate(aDataDet.AllClusters[0:nevents]) :
-        for cluster in clusters :
-            if i%skip==0 :
 
-                for track in aDataDet.AllTracks[i] :
+    for i, tracks in enumerate(aDataDet.AllTracks[0:nevents]):
+        if i%skip == 0:
+            for track in tracks:
+                closestcluster = 999
+                for cluster in aDataDet.AllClusters[i]:
+
                     tmp=np.dot(RotationMatrix([0.,0.,parameters[0]]),[track.trackX[track.iden.index(dut)],track.trackY[track.iden.index(dut)],0])
                     tmp[0] = tmp[0] + parameters[1]
                     tmp[1] = tmp[1] + parameters[2]
 
-                    distx=cluster.absX -tmp[0]
-                    disty=cluster.absY -tmp[1]
+                    distx=cluster.absX - tmp[0]
+                    disty=cluster.absY - tmp[1]
                     r = sqrt(distx**2 + disty**2)
 
-                    if r < 0.5:
-                        totaldist_evaluator+=r
-                        n+=1
+                    if r < closestcluster:
+                        closestcluster = r
 
-    result = totaldist_evaluator/n
+                if closestcluster < 0.5:
+                    totaldist_evaluator += closestcluster
+                    n += 1
+
+    result = totaldist_evaluator
     print "Evaluating for Rotation : %f %f %f [deg] Trans : %f %f  [mm] metric = %f  n = %i"%(0., 0., parameters[0],parameters[1],parameters[2],result,n)
     return result
 
@@ -915,7 +920,7 @@ def PerformPreAlignment(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,R
 
 
 def PerformAlignement(aDataSet,nevent,skip,max_matched_dist=0.1,filename='Alignment.txt', dut=6) :
-    x0 = np.array([0.,0.,0.])
+    x0 = np.array([0.,0.,0.]) # [zrot, xtrans, ytrans]
     argTuple = aDataSet,nevent,skip
     res = minimize(TotalDistanceFunction,x0,argTuple,method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
     return [0.,0.,res.x[0]],[res.x[1],res.x[2]]
