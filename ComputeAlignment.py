@@ -143,6 +143,14 @@ prev_pixel_xhits = [999, 999]
 clusters_tmp = []
 last_time=time.time()
 
+# Load hot pixels
+hotpixel_filename = "%s/Run%i/HotPixels_%i_0.01.txt" %(PlotPath,RunNumber,RunNumber)
+print "Hotpixel filename:", hotpixel_filename
+if os.path.isfile(hotpixel_filename):
+    aDataSet.LoadHotPixel(hotpixel_filename)
+else:
+    print "WARNING no hot pixel file found. No hot pixels set"
+
 for i in range(0,n_proc) :
     aDataSet.getEvent(i)
 
