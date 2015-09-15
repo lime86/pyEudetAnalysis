@@ -136,7 +136,7 @@ else:
     skip = 1
 print "Running on run %i, with method %s, on %i events with skip %i" %(RunNumber,method_name,n_proc,skip)
 
-AlignmentPath = "%s/Run%i/Alignment_%i_%s_%i_%i.txt" %(PlotPath,RunNumber,RunNumber,method_name,int(options.NEVENT),skip)
+AlignmentPath = "%s/Run%i/alignment_%i_%s_%i_%i.dat" %(PlotPath,RunNumber,RunNumber,method_name,int(options.NEVENT),skip)
 print "Alignment path will be", AlignmentPath
 
 prev_pixel_xhits = [999, 999]

@@ -26,7 +26,7 @@ parser.add_option("-o", "--output",
                   help="Histograms and results output folder", dest="OUTPUT", default=".")
 
 parser.add_option("-a", "--alignment",
-                  help="alignment file", dest="ALIGNMENT", default="alignment.dat")
+                  help="alignment file", dest="ALIGNMENT", default="Alignment.txt")
 
 parser.add_option("-e", "--edge",
                   help="edge width", dest="EDGE", default=0.0, type="float")
