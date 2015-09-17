@@ -1000,6 +1000,7 @@ def FindSigmaMin(dataSet,nevent,PlotPath,RunNumber,method_name, skip=1, dut=6) :
     bestsigma=1000
     bestres=1000
     sigmaint_max = 500
+    print "Looking for SigmaMin for TOT"
     for sigmaint in range(sigmaint_max) :
     	sigma=sigmaint*1e-4
         
@@ -1024,6 +1025,7 @@ def FindSigmaMin(dataSet,nevent,PlotPath,RunNumber,method_name, skip=1, dut=6) :
         bestsigmaGC=1000
         bestresGC=1000
         sigmaintGC_max = 500
+        print "Looking for SigmaMin for GC"
         for sigmaintGC in range(sigmaintGC_max) :
             sigmaGC=sigmaintGC*1e-4
 
@@ -1042,6 +1044,7 @@ def FindSigmaMin(dataSet,nevent,PlotPath,RunNumber,method_name, skip=1, dut=6) :
         bestsigmaPbPC=1000
         bestresPbPC=1000
         sigmaintPbPC_max = 500
+        print "Looking for SigmaMin for PbPC"
         for sigmaintPbPC in range(sigmaintPbPC_max) :
             sigmaPbPC=sigmaintPbPC*1e-4
 
@@ -1122,58 +1125,57 @@ def ApplyEtaCorrection(dataSet,ressigmachargeX,ressigmachargeY,dut=6,filename="E
 
 def EdgeEfficiency(aDataSet,dut) :
 
-    TotalTrack = TH1D("TotalTrack","Track distribution in edge",50,0,aDataSet.edge)
-    MatchedTrack = TH1D("MatchedTrack","Matched track distribution in edge",50,0,aDataSet.edge)
-    TOT_vs_edge = TH2D("TOT_vs_edge","TOT vs track position in edge",50,0,aDataSet.edge,200,0,1000)
+    TotalTrack = TH1D("TotalTrack","Track distribution in edge",140,-0.07,0.07)
+    MatchedTrack = TH1D("MatchedTrack","Matched track distribution in edge",140,-0.07,0.07)
+    TOT_vs_edge = TH2D("TOT_vs_edge","TOT vs track position in edge",140,-0.07,0.07,200,0,1000)
 
     edge_tracks = []
     edge_matched = []
     edge_efficiencies = []
     for i in range(4):
-        TotalTrack_edge = TH1D("TotalTrack_edge_%i"%i,"Track distribution in edge %i" %i,50,0,aDataSet.edge)
-        MatchedTrack_edge = TH1D("MatchedTrack_edge_%i"%i,"Matched track distribution in edge %i" %i,50,0,aDataSet.edge)
+        TotalTrack_edge = TH1D("TotalTrack_edge_%i"%i,"Track distribution in edge %i" %i,140,-0.07,0.07)
+        MatchedTrack_edge = TH1D("MatchedTrack_edge_%i"%i,"Matched track distribution in edge %i" %i,140,-0.07,0.07)
         edge_tracks.append(TotalTrack_edge)
         edge_matched.append(MatchedTrack_edge)
 
 
     for j,tracks in enumerate(aDataSet.AllTracks) :
         for track in tracks :
-            if(aDataSet.IsInEdges(track,dut)) :
-                if(fabs(track.trackX[track.iden.index(dut)])>halfChip_X and fabs(track.trackY[track.iden.index(dut)])<halfChip_Y):
-                    TotalTrack.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+            if(fabs(track.trackX[track.iden.index(dut)])>(halfChip_X-0.07) and fabs(track.trackY[track.iden.index(dut)])<halfChip_Y):
+                TotalTrack.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+                if(track.trackX[track.iden.index(dut)]>0) :
+                    edge_tracks[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+                else :
+                    edge_tracks[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+
+                if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
+                    MatchedTrack.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+                    TOT_vs_edge.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X,aDataSet.AllClusters[j][track.cluster].totalTOT)
                     if(track.trackX[track.iden.index(dut)]>0) :
-                        edge_tracks[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+                        edge_matched[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
                     else :
-                        edge_tracks[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+                        edge_matched[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
 
-                    if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
-                        MatchedTrack.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
-                        TOT_vs_edge.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X,aDataSet.AllClusters[j][track.cluster].totalTOT)
-                        if(track.trackX[track.iden.index(dut)]>0) :
-                            edge_matched[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
-                        else :
-                            edge_matched[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+            if(fabs(track.trackX[track.iden.index(dut)])<halfChip_X and fabs(track.trackY[track.iden.index(dut)])>(halfChip_Y-0.07)):
+                TotalTrack.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                if(track.trackY[track.iden.index(dut)]>0) :
+                    edge_tracks[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                else :
+                    edge_tracks[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
 
-                if(fabs(track.trackX[track.iden.index(dut)])<halfChip_X and fabs(track.trackY[track.iden.index(dut)])>halfChip_Y):
-                    TotalTrack.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
+                    MatchedTrack.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                    TOT_vs_edge.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y,aDataSet.AllClusters[j][track.cluster].totalTOT)
                     if(track.trackY[track.iden.index(dut)]>0) :
-                        edge_tracks[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                        edge_matched[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
                     else :
-                        edge_tracks[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
-
-                    if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
-                        MatchedTrack.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
-                        TOT_vs_edge.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y,aDataSet.AllClusters[j][track.cluster].totalTOT)
-                        if(track.trackY[track.iden.index(dut)]>0) :
-                            edge_matched[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
-                        else :
-                            edge_matched[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                        edge_matched[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
 
 
     for i in range(4):
         edge_tracks[i].SetLineColor(i+1)
         edge_matched[i].SetLineColor(i+1)
-        h = edge_matched[i].Clone("Efficiency")
+        h = edge_matched[i].Clone("Efficiency_%i" %i)
         h.Divide(edge_matched[i],edge_tracks[i],1.,1.,"B")
         h.SetTitle("Efficiency in edge %i"%i)
         edge_efficiencies.append(h)
