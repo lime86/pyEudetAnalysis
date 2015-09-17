@@ -173,9 +173,7 @@ def ComputeDetectorAcceptance(dataSet, dut=6, edges = 0):
     last_time = time.time()
     for i,tracks in enumerate(dataSet.AllTracks) :
         for track in tracks :
-            #if (i%1000==0):
-                #print "Elapsed time for track in acceptance, event %i: %f s"%(i,(time.time()-last_time))
-            if (track.trackX[track.iden.index(dut)]>=(-(pitchX*npix_X)/2.-edges) and track.trackX[track.iden.index(dut)]<=((pitchX*npix_X)/2.+edges)) and (track.trackY[track.iden.index(dut)]>=(-(pitchY*npix_Y)/2.-edges) and track.trackY[track.iden.index(dut)]<=((pitchY*npix_Y)/2.+edges)) :
+            if (track.trackX[track.iden.index(dut)]>=(-halfChip_X-edges) and track.trackX[track.iden.index(dut)]<=(halfChip_X+edges)) and (track.trackY[track.iden.index(dut)]>=(-halfChip_Y-edges) and track.trackY[track.iden.index(dut)]<=(halfChip_Y+edges)) :
                 n_tracks_in+=1
     return n_tracks_in
 
@@ -518,8 +516,8 @@ def ClusterHitProb(dataSet,nbin,dut=6):
 
 def TrackClusterCorrelation(dataSet,dut=6,imax=1000):
 
-    histox = TH2D("corX","Track-cluster x correlation",npix_X,-(npix_X)*pitchX/2.,npix_X*pitchX/2.,npix_X,-(npix_X)*pitchX/2.,npix_X*pitchX/2.)
-    histoy = TH2D("corY","Track-cluster y correlation",npix_Y,-(npix_Y)*pitchY/2.,npix_Y*pitchY/2.,npix_Y,-(npix_Y)*pitchY/2.,npix_Y*pitchY/2.)
+    histox = TH2D("corX","Track-cluster x correlation",npix_X,-halfChip_X,halfChip_X,npix_X,-halfChip_X,halfChip_X)
+    histoy = TH2D("corY","Track-cluster y correlation",npix_Y,-halfChip_Y,halfChip_Y,npix_Y,-halfChip_Y,halfChip_Y)
 
     for h in [histox,histoy] :
         h.GetXaxis().SetTitle("Cluster position (mm)")
