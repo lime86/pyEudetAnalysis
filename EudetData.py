@@ -664,10 +664,10 @@ class EudetData:
                     if cluster.id == track.cluster  :
                         cluster.GetResiduals(track.trackX[track.iden.index(dut)],track.trackY[track.iden.index(dut)])
 
-                        if(self.IsInEdges(track, dut)):
-                            nmatch_in_edge += 1.
-                        else :
+                        if(self.IsInMain(track, dut)):
                             nmatch_in_main += 1.
+                        elif(self.IsInEdges(track, dut)):
+                            nmatch_in_edge += 1.
 
         return nmatch_in_main, nmatch_in_edge
 
@@ -816,21 +816,16 @@ class EudetData:
 
                 cluster = clusters_tmp[distances.index(min(distances))]
 
-                if ((fabs(track.trackX[dut_iden])<=(halfChip_X+self.edge+TrackingRes))and(fabs(track.trackY[dut_iden])<=(halfChip_Y+self.edge+TrackingRes))):
-                    if (min(distances) < r_max) :
-                        # matched cluster
-                        cluster.id = good_count
-                        track.cluster = cluster.id
-                        cluster.tracknum = track.trackNum[dut_iden]
-                        matched_clusters.append(cluster)
-                        good_count += 1
-
-                    else :
-                        # unmatched cluster
-                        track.cluster = -11
+                if (min(distances) < r_max) :
+                    # matched cluster
+                    cluster.id = good_count
+                    track.cluster = cluster.id
+                    cluster.tracknum = track.trackNum[dut_iden]
+                    matched_clusters.append(cluster)
+                    good_count += 1
 
                 else :
-                    # track outside DUT
+                    # unmatched cluster
                     track.cluster = -11
 
             else :

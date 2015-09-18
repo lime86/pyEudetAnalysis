@@ -1125,7 +1125,7 @@ def EdgeEfficiency(aDataSet,dut) :
 
     TotalTrack = TH1D("TotalTrack","Track distribution in edge",140,-0.07,0.07)
     MatchedTrack = TH1D("MatchedTrack","Matched track distribution in edge",140,-0.07,0.07)
-    TOT_vs_edge = TH2D("TOT_vs_edge","TOT vs track position in edge",140,-0.07,0.07,200,0,1000)
+    TOT_vs_edge = TH2D("TOT_vs_edge","TOT vs track position in edge",140,-0.07,0.07,200,0,3000)
 
     edge_tracks = []
     edge_matched = []
@@ -1187,17 +1187,17 @@ def EdgeEfficiency(aDataSet,dut) :
 
 
 def ComputeEfficiency(aDataSet,n_matched,n_matched_edge,edge,PlotPath, dut=6):
-    n_tracks_in_total = ComputeDetectorAcceptance(aDataSet,dut,edge)
+    n_tracks_in_mainplusedge = ComputeDetectorAcceptance(aDataSet,dut,edge)
     n_tracks_in_main = ComputeDetectorAcceptance(aDataSet, dut,0)
-    n_tracks_in_edge = n_tracks_in_total - n_tracks_in_main
+    n_tracks_in_edge = n_tracks_in_mainplusedge - n_tracks_in_main
 
-    print "n_tracks_in_total", n_tracks_in_total
+    print "n_tracks_in_mainplusedge", n_tracks_in_mainplusedge
     print "n_tracks_in_main", n_tracks_in_main
     print "n_tracks_in_edge", n_tracks_in_edge
 
     efficiency_in_main = 0.
     efficiency_in_edge = 0.
-    efficiency_in_total = 0.
+    efficiency_in_mainplusedge = 0.
 
     if n_tracks_in_main != 0 :
         efficiency_in_main = float(n_matched)/n_tracks_in_main
@@ -1209,19 +1209,19 @@ def ComputeEfficiency(aDataSet,n_matched,n_matched_edge,edge,PlotPath, dut=6):
     else:
         efficiency_in_edge = 0.
 
-    if n_tracks_in_total != 0. :
-        efficiency_in_total = float(n_matched + n_matched_edge)/n_tracks_in_total
+    if n_tracks_in_mainplusedge != 0. :
+        efficiency_in_mainplusedge = float(n_matched + n_matched_edge)/n_tracks_in_mainplusedge
     else:
-        efficiency_in_total = 0.
+        efficiency_in_mainplusedge = 0.
        
     print "Efficiency in main : %f %%"%(efficiency_in_main*100)
     print "Efficiency in edge : %f %%"%(efficiency_in_edge*100)
-    print "Efficiency in total : %f %%"%(efficiency_in_total*100)
+    print "Efficiency in mainplusedge : %f %%"%(efficiency_in_mainplusedge*100)
 
     f = open("%s/Efficiency.txt"%PlotPath,'w')
     f.write("Efficiency in main : %f %%\n"%(efficiency_in_main*100))
     f.write("Efficiency in edge : %f %%\n"%(efficiency_in_edge*100))
-    f.write("Efficiency in total : %f %%\n"%(efficiency_in_total*100))
+    f.write("Efficiency in mainplusedge : %f %%\n"%(efficiency_in_mainplusedge*100))
     f.close()
 
 
