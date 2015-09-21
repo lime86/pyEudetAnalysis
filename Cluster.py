@@ -133,8 +133,8 @@ class Cluster:
             self.relX = self.relX/self.totalTOT + pitchX/2.
             self.relY = self.relY/self.totalTOT + pitchY/2.
 
-            self.absX=self.relX - npix_X*pitchX/2.
-            self.absY=self.relY - npix_Y*pitchY/2.
+            self.absX=self.relX - halfChip_X
+            self.absY=self.relY - halfChip_Y
             self.absZ=0
 
         if ((self.totalEnergyGC > 0) and (0 not in self.energyGC)):
@@ -145,8 +145,8 @@ class Cluster:
             self.relX_energyGC = self.relX_energyGC/self.totalEnergyGC + pitchX/2.
             self.relY_energyGC = self.relY_energyGC/self.totalEnergyGC + pitchY/2.
 
-            self.absX_energyGC=self.relX_energyGC - npix_X*pitchX/2.
-            self.absY_energyGC=self.relY_energyGC - npix_Y*pitchY/2.
+            self.absX_energyGC=self.relX_energyGC - halfChip_X
+            self.absY_energyGC=self.relY_energyGC - halfChip_Y
             self.absZ_energyGC=0
 
         if ((self.totalEnergyPbPC > 0) and (0 not in self.energyPbPC)):
@@ -157,8 +157,8 @@ class Cluster:
             self.relX_energyPbPC = self.relX_energyPbPC/self.totalEnergyPbPC + pitchX/2.
             self.relY_energyPbPC = self.relY_energyPbPC/self.totalEnergyPbPC + pitchY/2.
 
-            self.absX_energyPbPC=self.relX_energyPbPC - npix_X*pitchX/2.
-            self.absY_energyPbPC=self.relY_energyPbPC - npix_Y*pitchY/2.
+            self.absX_energyPbPC=self.relX_energyPbPC - halfChip_X
+            self.absY_energyPbPC=self.relY_energyPbPC - halfChip_Y
             self.absZ_energyPbPC=0
 
 #
@@ -174,8 +174,8 @@ class Cluster:
         self.relX = self.relX/len(self.col) + pitchX/2.
         self.relY = self.relY/len(self.row) + pitchY/2.
 
-        self.absX=self.relX - npix_X*pitchX/2.
-        self.absY=self.relY - npix_Y*pitchY/2.
+        self.absX=self.relX - halfChip_X
+        self.absY=self.relY - halfChip_Y
         self.absZ=0
 
 #
@@ -192,8 +192,8 @@ class Cluster:
         self.relX=self.col[maxTOTindex_tmp]*pitchX + pitchX/2.
         self.relY=self.row[maxTOTindex_tmp]*pitchY + pitchY/2.
 
-        self.absX=self.relX - npix_X*pitchX/2.
-        self.absY=self.relY - npix_Y*pitchY/2.
+        self.absX=self.relX - halfChip_X
+        self.absY=self.relY - halfChip_Y
         self.absZ=0
 
 #
@@ -370,14 +370,14 @@ class Cluster:
             self.GetQWeightedCentroid()
 
 
-        self.absX = self.relX - npix_X*pitchX/2.
-        self.absY = self.relY - npix_Y*pitchY/2.
+        self.absX = self.relX - halfChip_X
+        self.absY = self.relY - halfChip_Y
         self.absZ = 0
-        self.absX_energyGC = self.relX_energyGC - npix_X*pitchX/2.
-        self.absY_energyGC = self.relY_energyGC - npix_Y*pitchY/2.
+        self.absX_energyGC = self.relX_energyGC - halfChip_X
+        self.absY_energyGC = self.relY_energyGC - halfChip_Y
         self.absZ_energyGC = 0
-        self.absX_energyPbPC = self.relX_energyPbPC - npix_X*pitchX/2.
-        self.absY_energyPbPC = self.relY_energyPbPC - npix_Y*pitchY/2.
+        self.absX_energyPbPC = self.relX_energyPbPC - halfChip_X
+        self.absY_energyPbPC = self.relY_energyPbPC - halfChip_Y
         self.absZ_energyPbPC = 0
 
 
