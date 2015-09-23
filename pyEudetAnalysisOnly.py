@@ -208,7 +208,7 @@ print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n
 
 
 # EdgeEfficiency
-TotalTrack, MatchedTrack, Efficiency, edge_tracks, edge_matched, edge_efficiencies, TOT_vs_edge = EdgeEfficiency(aDataSet,dutID)
+TotalTrack, MatchedTrack, Efficiency, edge_tracks, edge_matched, edge_efficiencies, TOT_vs_edge, edge_tots = EdgeEfficiency(aDataSet,dutID)
 
 eff_can = TCanvas()
 MatchedTrack.Draw("")
@@ -1229,6 +1229,7 @@ for i in range(4) :
     edge_efficiencies[i].Write()
     edge_matched[i].Write()
     edge_tracks[i].Write()
+    edge_tots[i].Write()
 hClusterSize.Write()
 hClusterSizeX.Write()
 hClusterSizeY.Write()
