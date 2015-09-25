@@ -207,6 +207,38 @@ if len(aDataSet.AllTracks)< n_proc :
 print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n_proc)
 
 
+# ComputeEfficiency
+n_matched_in_main = 0
+n_matched_in_edge = 0
+last_time = time.time()
+
+
+if (method_name == "EtaCorrection") :
+    ressigmacharge, ressigmachargeGC, ressigmachargePbPC = FindSigmaMin(aDataSet,aDataSet.p_nEntries,PlotPath,RunNumber,method_name,10, dutID)
+
+else: 
+    ressigmacharge=0.01
+    ressigmachargeGC=0.01
+    ressigmachargePbPC=0.01
+
+for i in range(n_proc-1) :
+    aDataSet.FindMatchedCluster(i,0.1,dutID)
+    aDataSet.ComputePosition(i,method_name,ressigmacharge,ressigmachargeGC,ressigmachargePbPC)
+    m,me = aDataSet.ComputeResiduals(i, dutID)
+    n_matched_in_main += m
+    n_matched_in_edge += me
+
+    if i%10000 ==0 :
+        print "Event %d"%i
+        print "Elapsed time/10000 Event : %f s"%(time.time()-last_time)
+        last_time = time.time()
+
+print "Found %i matched track-cluster binome in main" %n_matched_in_main
+print "And %i matched track-cluster binome in edges" %n_matched_in_edge
+
+ComputeEfficiency(aDataSet,n_matched_in_main,n_matched_in_edge,edge_width,"%s/Run%i/%s"%(PlotPath,RunNumber,method_name), dutID)
+
+
 # EdgeEfficiency
 edge_tracks, edge_matched, edge_efficiencies, edge_tots = EdgeEfficiency(aDataSet,dutID)
 
@@ -240,38 +272,6 @@ edge_tots[2].Draw("colz")
 eff_can.SaveAs("%s/Run%i/%s/Edge_TOT_edge2.pdf"%(PlotPath,RunNumber,method_name))
 edge_tots[3].Draw("colz")
 eff_can.SaveAs("%s/Run%i/%s/Edge_TOT_edge3.pdf"%(PlotPath,RunNumber,method_name))
-
-
-# ComputeEfficiency
-n_matched_in_main = 0
-n_matched_in_edge = 0
-last_time = time.time()
-
-
-if (method_name == "EtaCorrection") :
-    ressigmacharge, ressigmachargeGC, ressigmachargePbPC = FindSigmaMin(aDataSet,aDataSet.p_nEntries,PlotPath,RunNumber,method_name,10, dutID)
-
-else: 
-    ressigmacharge=0.01
-    ressigmachargeGC=0.01
-    ressigmachargePbPC=0.01
-
-for i in range(n_proc-1) :
-    aDataSet.FindMatchedCluster(i,0.1,dutID)
-    aDataSet.ComputePosition(i,method_name,ressigmacharge,ressigmachargeGC,ressigmachargePbPC)
-    m,me = aDataSet.ComputeResiduals(i, dutID)
-    n_matched_in_main += m
-    n_matched_in_edge += me
-
-    if i%10000 ==0 :
-        print "Event %d"%i
-        print "Elapsed time/10000 Event : %f s"%(time.time()-last_time)
-        last_time = time.time()
-
-print "Found %i matched track-cluster binome in main" %n_matched_in_main
-print "And %i matched track-cluster binome in edges" %n_matched_in_edge
-
-ComputeEfficiency(aDataSet,n_matched_in_main,n_matched_in_edge,edge_width,"%s/Run%i/%s"%(PlotPath,RunNumber,method_name), dutID)
 
 
 # CountClusterSize
