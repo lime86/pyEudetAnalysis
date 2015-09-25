@@ -1123,10 +1123,6 @@ def ApplyEtaCorrection(dataSet,ressigmachargeX,ressigmachargeY,dut=6,filename="E
 
 def EdgeEfficiency(aDataSet,dut) :
 
-    TotalTrack = TH1D("TotalTrack","Track distribution in edge",140,-0.07,0.07)
-    MatchedTrack = TH1D("MatchedTrack","Matched track distribution in edge",140,-0.07,0.07)
-    TOT_vs_edge = TH2D("TOT_vs_edge","TOT vs track position in edge",140,-0.07,0.07,200,0,3000)
-
     edge_tracks = []
     edge_matched = []
     edge_efficiencies = []
@@ -1142,15 +1138,12 @@ def EdgeEfficiency(aDataSet,dut) :
     for j,tracks in enumerate(aDataSet.AllTracks) :
         for track in tracks :
             if(fabs(track.trackX[track.iden.index(dut)])>(halfChip_X-0.07) and fabs(track.trackY[track.iden.index(dut)])<halfChip_Y):
-                TotalTrack.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
                 if(track.trackX[track.iden.index(dut)]>0) :
                     edge_tracks[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
                 else :
                     edge_tracks[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
 
                 if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
-                    MatchedTrack.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
-                    TOT_vs_edge.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X,aDataSet.AllClusters[j][track.cluster].totalTOT)
                     if(track.trackX[track.iden.index(dut)]>0) :
                         edge_matched[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
                         edge_tots[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X,aDataSet.AllClusters[j][track.cluster].totalTOT)
@@ -1159,15 +1152,12 @@ def EdgeEfficiency(aDataSet,dut) :
                         edge_tots[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X,aDataSet.AllClusters[j][track.cluster].totalTOT)
 
             if(fabs(track.trackX[track.iden.index(dut)])<halfChip_X and fabs(track.trackY[track.iden.index(dut)])>(halfChip_Y-0.07)):
-                TotalTrack.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
                 if(track.trackY[track.iden.index(dut)]>0) :
                     edge_tracks[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
                 else :
                     edge_tracks[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
 
                 if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
-                    MatchedTrack.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
-                    TOT_vs_edge.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y,aDataSet.AllClusters[j][track.cluster].totalTOT)
                     if(track.trackY[track.iden.index(dut)]>0) :
                         edge_matched[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
                         edge_tots[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y,aDataSet.AllClusters[j][track.cluster].totalTOT)
@@ -1184,11 +1174,7 @@ def EdgeEfficiency(aDataSet,dut) :
         h.SetTitle("Efficiency in edge %i"%i)
         edge_efficiencies.append(h)
 
-    Efficiency = MatchedTrack.Clone("Efficiency")
-    Efficiency.Divide(MatchedTrack,TotalTrack,1.,1.,"B")
-    Efficiency.SetTitle("Efficiency")
-
-    return TotalTrack, MatchedTrack, Efficiency, edge_tracks, edge_matched, edge_efficiencies, TOT_vs_edge, edge_tots
+    return edge_tracks, edge_matched, edge_efficiencies, edge_tots
 
 
 
