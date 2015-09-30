@@ -79,8 +79,8 @@ scaler =1
 home = environ['HOME']
 
 # calibration constants
-if Assembly == "B06-W0126":
-    print "Taking calibration constants for B06-W0126"
+if Assembly == "B06-W0125":
+    print "Taking calibration constants for B06-W0125"
     globalCalib_a = 30.8
     globalCalib_b = 484.3
     globalCalib_c = 1301.0
