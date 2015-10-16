@@ -173,9 +173,7 @@ def ComputeDetectorAcceptance(dataSet, dut=6, edges = 0):
     last_time = time.time()
     for i,tracks in enumerate(dataSet.AllTracks) :
         for track in tracks :
-            #if (i%1000==0):
-                #print "Elapsed time for track in acceptance, event %i: %f s"%(i,(time.time()-last_time))
-            if (track.trackX[track.iden.index(dut)]>=(-(pitchX*npix_X)/2.-edges) and track.trackX[track.iden.index(dut)]<=((pitchX*npix_X)/2.+edges)) and (track.trackY[track.iden.index(dut)]>=(-(pitchY*npix_Y)/2.-edges) and track.trackY[track.iden.index(dut)]<=((pitchY*npix_Y)/2.+edges)) :
+            if (track.trackX[track.iden.index(dut)]>=(-halfChip_X-edges) and track.trackX[track.iden.index(dut)]<=(halfChip_X+edges)) and (track.trackY[track.iden.index(dut)]>=(-halfChip_Y-edges) and track.trackY[track.iden.index(dut)]<=(halfChip_Y+edges)) :
                 n_tracks_in+=1
     return n_tracks_in
 
@@ -518,8 +516,8 @@ def ClusterHitProb(dataSet,nbin,dut=6):
 
 def TrackClusterCorrelation(dataSet,dut=6,imax=1000):
 
-    histox = TH2D("corX","Track-cluster x correlation",npix_X,-(npix_X)*pitchX/2.,npix_X*pitchX/2.,npix_X,-(npix_X)*pitchX/2.,npix_X*pitchX/2.)
-    histoy = TH2D("corY","Track-cluster y correlation",npix_Y,-(npix_Y)*pitchY/2.,npix_Y*pitchY/2.,npix_Y,-(npix_Y)*pitchY/2.,npix_Y*pitchY/2.)
+    histox = TH2D("corX","Track-cluster x correlation",npix_X,-halfChip_X,halfChip_X,npix_X,-halfChip_X,halfChip_X)
+    histoy = TH2D("corY","Track-cluster y correlation",npix_Y,-halfChip_Y,halfChip_Y,npix_Y,-halfChip_Y,halfChip_Y)
 
     for h in [histox,histoy] :
         h.GetXaxis().SetTitle("Cluster position (mm)")
@@ -715,7 +713,7 @@ def TotalRotationFunction(Rotations,Translations,aDataDet,nevents,skip=1,cut = 0
 #param 3: number of skiped events (compute residuals for 1 event over 'skip' events)
 #param 4: position of the device under test in the list of planes
 #
-def TotalSigmaFunctionX(sigmaCharge_tmp,dataSet,skip,dut=6):
+def TotalSigmaFunctionX(sigmaCharge_tmp,dataSet,skip,dut=6,mode="tot"):
 
     tmpx = TH1D("resX_2","Unbiased residual X, cluster size Y = 2",300,-0.150,0.150)
     
@@ -726,9 +724,18 @@ def TotalSigmaFunctionX(sigmaCharge_tmp,dataSet,skip,dut=6):
                 if track.cluster!=-11 and len(dataSet.AllClusters[j])!=0 :
                     aCluster = dataSet.AllClusters[j][track.cluster]
                     if(aCluster.sizeX==2 and aCluster.sizeY==1) :
-                        aCluster.GetEtaCorrectedQWeightedCentroid(sigmaCharge_tmp)
-                        dataSet.ComputeResiduals(j, dut)
-                        tmpx.Fill(aCluster.resX)
+                        if mode == "tot":
+                            aCluster.GetEtaCorrectedQWeightedCentroid(sigmaCharge_tmp)
+                            dataSet.ComputeResiduals(j, dut)
+                            tmpx.Fill(aCluster.resX)
+                        elif mode == "gc":
+                            aCluster.GetEtaCorrectedQWeightedCentroid(0.0,sigmaCharge_tmp)
+                            dataSet.ComputeResiduals(j, dut)
+                            tmpx.Fill(aCluster.resX_energyGC)
+                        elif mode == "pbpc":
+                            aCluster.GetEtaCorrectedQWeightedCentroid(0.0,0.0,sigmaCharge_tmp)
+                            dataSet.ComputeResiduals(j, dut)
+                            tmpx.Fill(aCluster.resX_energyPbPC)
 
 #     for i in range(dataSet.p_nEntries) :
 #         if i%skip==0 :
@@ -772,7 +779,7 @@ def TotalSigmaFunctionX(sigmaCharge_tmp,dataSet,skip,dut=6):
 #param 3: number of skiped events (compute residuals for 1 event over 'skip' events)
 #param 4: position of the device under test in the list of planes
 #
-def TotalSigmaFunctionY(sigmaCharge_tmp,dataSet,skip,dut=6):
+def TotalSigmaFunctionY(sigmaCharge_tmp,dataSet,skip,dut=6,mode="tot"):
     
     tmpy = TH1D("resY_1","Unbiased residual Y, cluster size Y = 2",300,-0.150,0.150)
     for j,tracks in enumerate(dataSet.AllTracks) :
@@ -781,9 +788,18 @@ def TotalSigmaFunctionY(sigmaCharge_tmp,dataSet,skip,dut=6):
                 if track.cluster!=-11 and len(dataSet.AllClusters[j])!=0 :
                     aCluster = dataSet.AllClusters[j][track.cluster]
                     if(aCluster.sizeY==2 and aCluster.sizeX==1) :
-                        aCluster.GetEtaCorrectedQWeightedCentroid(sigmaCharge_tmp)
-                        dataSet.ComputeResiduals(j, dut)
-                        tmpy.Fill(aCluster.resY)
+                        if mode=="tot":
+                            aCluster.GetEtaCorrectedQWeightedCentroid(sigmaCharge_tmp)
+                            dataSet.ComputeResiduals(j, dut)
+                            tmpy.Fill(aCluster.resY)
+                        elif mode=="gc":
+                            aCluster.GetEtaCorrectedQWeightedCentroid(0.0,sigmaCharge_tmp)
+                            dataSet.ComputeResiduals(j, dut)
+                            tmpy.Fill(aCluster.resY_energyGC)
+                        elif mode=="pbpc":
+                            aCluster.GetEtaCorrectedQWeightedCentroid(0.0,0.0,sigmaCharge_tmp)
+                            dataSet.ComputeResiduals(j, dut)
+                            tmpy.Fill(aCluster.resY_energyPbPC)
 
 #     for i in range(dataSet.p_nEntries) :
 #         if i%skip==0 :
@@ -816,28 +832,33 @@ def TotalSigmaFunctionY(sigmaCharge_tmp,dataSet,skip,dut=6):
 
 
 
-def TotalDistanceFunction(parameters,aDataDet,nevents,skip,cutx = 0.1, cuty = 0.1,dut=6):
+def TotalDistanceFunction(parameters,aDataDet,nevents,skip,dut=6):
 
     totaldist_evaluator = 0.
     n = 0
-    for i,clusters in enumerate(aDataDet.AllClusters[0:nevents]) :
-        for cluster in clusters :
-            if i%skip==0 :
 
-                for track in aDataDet.AllTracks[i] :
+    for i, tracks in enumerate(aDataDet.AllTracks[0:nevents]):
+        if i%skip == 0:
+            for track in tracks:
+                closestcluster = 999
+                for cluster in aDataDet.AllClusters[i]:
+
                     tmp=np.dot(RotationMatrix([0.,0.,parameters[0]]),[track.trackX[track.iden.index(dut)],track.trackY[track.iden.index(dut)],0])
                     tmp[0] = tmp[0] + parameters[1]
                     tmp[1] = tmp[1] + parameters[2]
 
-                    distx=cluster.absX -tmp[0]
-                    disty=cluster.absY -tmp[1]
+                    distx=cluster.absX - tmp[0]
+                    disty=cluster.absY - tmp[1]
                     r = sqrt(distx**2 + disty**2)
 
-                    if r < 0.5:
-                        totaldist_evaluator+=r
-                        n+=1
+                    if r < closestcluster:
+                        closestcluster = r
 
-    result = totaldist_evaluator/n
+                if closestcluster < 0.5:
+                    totaldist_evaluator += closestcluster
+                    n += 1
+
+    result = totaldist_evaluator
     print "Evaluating for Rotation : %f %f %f [deg] Trans : %f %f  [mm] metric = %f  n = %i"%(0., 0., parameters[0],parameters[1],parameters[2],result,n)
     return result
 
@@ -897,7 +918,7 @@ def PerformPreAlignment(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,R
 
 
 def PerformAlignement(aDataSet,nevent,skip,max_matched_dist=0.1,filename='Alignment.txt', dut=6) :
-    x0 = np.array([0.,0.,0.])
+    x0 = np.array([0.,0.,0.]) # [zrot, xtrans, ytrans]
     argTuple = aDataSet,nevent,skip
     res = minimize(TotalDistanceFunction,x0,argTuple,method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
     return [0.,0.,res.x[0]],[res.x[1],res.x[2]]
@@ -972,16 +993,17 @@ def Perform2StepAlignment(aDataSet,boundary,nevent,skip,cut = 0.1,filename='Alig
 #param 2: number of events we are running on
 #param 3: number of skiped events
 #
-def FindSigmaMin(dataSet,nevent,skip=1, dut=6) :
-    
+def FindSigmaMin(dataSet,nevent,PlotPath,RunNumber,method_name, skip=1, dut=6) :
+
     bestsigma=1000
     bestres=1000
     sigmaint_max = 500
+    print "Looking for SigmaMin for TOT"
     for sigmaint in range(sigmaint_max) :
     	sigma=sigmaint*1e-4
         
-    	resX=TotalSigmaFunctionX(sigma,dataSet,skip,dut)
-    	resY=TotalSigmaFunctionY(sigma,dataSet,skip,dut)
+    	resX=TotalSigmaFunctionX(sigma,dataSet,skip,dut,"tot")
+    	resY=TotalSigmaFunctionY(sigma,dataSet,skip,dut,"tot")
 	res=resX/2.0+resY/2.0
 	
 	if (res < bestres) : 
@@ -992,8 +1014,60 @@ def FindSigmaMin(dataSet,nevent,skip=1, dut=6) :
                 print "Press any key to continue, ctrl+D to exit"
                 blah = raw_input()
 
+    if future_builtins.Assembly=="AssemblyNotDefined":
+        bestsigmaGC = 0
+        bestresGC = 0
+        bestsigmaPbPC = 0
+        bestresPbPC = 0
+    else:
+        bestsigmaGC=1000
+        bestresGC=1000
+        sigmaintGC_max = 500
+        print "Looking for SigmaMin for GC"
+        for sigmaintGC in range(sigmaintGC_max) :
+            sigmaGC=sigmaintGC*1e-4
+
+            resXGC=TotalSigmaFunctionX(sigmaGC,dataSet,skip,dut,"gc")
+            resYGC=TotalSigmaFunctionY(sigmaGC,dataSet,skip,dut,"gc")
+            resGC=resXGC/2.0+resYGC/2.0
+
+            if (resGC < bestresGC) : 
+                bestresGC=resGC
+                bestsigmaGC=sigmaGC
+                if sigmaintGC == (sigmaintGC_max-1):
+                    print "WARNING sigmaGC optimisation hit limit. Adjust limit."
+                    print "Press any key to continue, ctrl+D to exit"
+                    blah = raw_input()
+
+        bestsigmaPbPC=1000
+        bestresPbPC=1000
+        sigmaintPbPC_max = 500
+        print "Looking for SigmaMin for PbPC"
+        for sigmaintPbPC in range(sigmaintPbPC_max) :
+            sigmaPbPC=sigmaintPbPC*1e-4
+
+            resXPbPC=TotalSigmaFunctionX(sigmaPbPC,dataSet,skip,dut,"pbpc")
+            resYPbPC=TotalSigmaFunctionY(sigmaPbPC,dataSet,skip,dut,"pbpc")
+            resPbPC=resXPbPC/2.0+resYPbPC/2.0
+
+            if (resPbPC < bestresPbPC) : 
+                bestresPbPC=resPbPC
+                bestsigmaPbPC=sigmaPbPC
+                if sigmaintPbPC == (sigmaintPbPC_max-1):
+                    print "WARNING sigmaPbPC optimisation hit limit. Adjust limit."
+                    print "Press any key to continue, ctrl+D to exit"
+                    blah = raw_input()
+
+    f = open("%s/Run%i/%s/SigmaMin.txt"%(PlotPath,RunNumber,method_name),'w')
+    f.write("Best Sigma found : %f\n"%(bestsigma))
+    f.write("Best SigmaGC found : %f\n"%(bestsigmaGC))
+    f.write("Best SigmaPbPC found : %f\n"%(bestsigmaPbPC))
+    f.close()
+
     print "Best sigma found: %f um, giving resolution: %f um" %(bestsigma*1000,bestres*1000)
-    return bestsigma
+    print "Best sigmaGC found: %f um, giving resolution: %f um" %(bestsigmaGC*1000,bestresGC*1000)
+    print "Best sigmaPbPC found: %f um, giving resolution: %f um" %(bestsigmaPbPC*1000,bestresPbPC*1000)
+    return bestsigma, bestsigmaGC, bestsigmaPbPC
 
 
 def ApplyAlignment(dataSet,translations,rotations,dut=6,filename="Alignment.txt") :
@@ -1049,82 +1123,73 @@ def ApplyEtaCorrection(dataSet,ressigmachargeX,ressigmachargeY,dut=6,filename="E
 
 def EdgeEfficiency(aDataSet,dut) :
 
-    TotalTrack = TH1D("TotalTrack","Track distribution in edge",50,0,aDataSet.edge)
-    MatchedTrack = TH1D("MatchedTrack","Matched track distribution in edge",50,0,aDataSet.edge)
-    TOT_vs_edge = TH2D("TOT_vs_edge","TOT vs track position in edge",50,0,aDataSet.edge,200,0,1000)
-
     edge_tracks = []
     edge_matched = []
     edge_efficiencies = []
+    edge_tots = []
     for i in range(4):
-        TotalTrack_edge = TH1D("TotalTrack_edge_%i"%i,"Track distribution in edge %i" %i,50,0,aDataSet.edge)
-        MatchedTrack_edge = TH1D("MatchedTrack_edge_%i"%i,"Matched track distribution in edge %i" %i,50,0,aDataSet.edge)
+        TotalTrack_edge = TH1D("TotalTrack_edge_%i"%i,"Track distribution in edge %i" %i,140,-0.07,0.07)
+        MatchedTrack_edge = TH1D("MatchedTrack_edge_%i"%i,"Matched track distribution in edge %i" %i,140,-0.07,0.07)
+        TOT_edge = TH2D("TOT_edge_%i"%i,"TOT vs track position in edge %i" %i,140,-0.07,0.07,200,0,3000)
         edge_tracks.append(TotalTrack_edge)
         edge_matched.append(MatchedTrack_edge)
-
+        edge_tots.append(TOT_edge)
 
     for j,tracks in enumerate(aDataSet.AllTracks) :
         for track in tracks :
-            if(aDataSet.IsInEdges(track,dut)) :
-                if(fabs(track.trackX[track.iden.index(dut)])>halfChip_X and fabs(track.trackY[track.iden.index(dut)])<halfChip_Y):
-                    TotalTrack.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+            if(fabs(track.trackX[track.iden.index(dut)])>(halfChip_X-0.07) and fabs(track.trackY[track.iden.index(dut)])<halfChip_Y):
+                if(track.trackX[track.iden.index(dut)]>0) :
+                    edge_tracks[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+                else :
+                    edge_tracks[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+
+                if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
                     if(track.trackX[track.iden.index(dut)]>0) :
-                        edge_tracks[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+                        edge_matched[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+                        edge_tots[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X,aDataSet.AllClusters[j][track.cluster].totalTOT)
                     else :
-                        edge_tracks[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+                        edge_matched[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+                        edge_tots[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X,aDataSet.AllClusters[j][track.cluster].totalTOT)
 
-                    if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
-                        MatchedTrack.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
-                        TOT_vs_edge.Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X,aDataSet.AllClusters[j][track.cluster].totalTOT)
-                        if(track.trackX[track.iden.index(dut)]>0) :
-                            edge_matched[0].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
-                        else :
-                            edge_matched[2].Fill(fabs(track.trackX[track.iden.index(dut)])-halfChip_X)
+            if(fabs(track.trackX[track.iden.index(dut)])<halfChip_X and fabs(track.trackY[track.iden.index(dut)])>(halfChip_Y-0.07)):
+                if(track.trackY[track.iden.index(dut)]>0) :
+                    edge_tracks[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                else :
+                    edge_tracks[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
 
-                if(fabs(track.trackX[track.iden.index(dut)])<halfChip_X and fabs(track.trackY[track.iden.index(dut)])>halfChip_Y):
-                    TotalTrack.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
                     if(track.trackY[track.iden.index(dut)]>0) :
-                        edge_tracks[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                        edge_matched[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                        edge_tots[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y,aDataSet.AllClusters[j][track.cluster].totalTOT)
                     else :
-                        edge_tracks[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
-
-                    if track.cluster!=-11 and len(aDataSet.AllClusters[j])!=0 :
-                        MatchedTrack.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
-                        TOT_vs_edge.Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y,aDataSet.AllClusters[j][track.cluster].totalTOT)
-                        if(track.trackY[track.iden.index(dut)]>0) :
-                            edge_matched[1].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
-                        else :
-                            edge_matched[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                        edge_matched[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y)
+                        edge_tots[3].Fill(fabs(track.trackY[track.iden.index(dut)])-halfChip_Y,aDataSet.AllClusters[j][track.cluster].totalTOT)
 
 
     for i in range(4):
         edge_tracks[i].SetLineColor(i+1)
         edge_matched[i].SetLineColor(i+1)
-        h = edge_matched[i].Clone("Efficiency")
+        h = edge_matched[i].Clone("Efficiency_%i" %i)
         h.Divide(edge_matched[i],edge_tracks[i],1.,1.,"B")
         h.SetTitle("Efficiency in edge %i"%i)
         edge_efficiencies.append(h)
 
-    Efficiency = MatchedTrack.Clone("Efficiency")
-    Efficiency.Divide(MatchedTrack,TotalTrack,1.,1.,"B")
-    Efficiency.SetTitle("Efficiency")
-
-    return TotalTrack, MatchedTrack, Efficiency, edge_tracks, edge_matched, edge_efficiencies, TOT_vs_edge
+    return edge_tracks, edge_matched, edge_efficiencies, edge_tots
 
 
 
 def ComputeEfficiency(aDataSet,n_matched,n_matched_edge,edge,PlotPath, dut=6):
-    n_tracks_in_total = ComputeDetectorAcceptance(aDataSet,dut,edge)
+    n_tracks_in_mainplusedge = ComputeDetectorAcceptance(aDataSet,dut,edge)
     n_tracks_in_main = ComputeDetectorAcceptance(aDataSet, dut,0)
-    n_tracks_in_edge = n_tracks_in_total - n_tracks_in_main
+    n_tracks_in_edge = n_tracks_in_mainplusedge - n_tracks_in_main
 
-    print "n_tracks_in_total", n_tracks_in_total
+    print "n_tracks_in_mainplusedge", n_tracks_in_mainplusedge
     print "n_tracks_in_main", n_tracks_in_main
     print "n_tracks_in_edge", n_tracks_in_edge
 
     efficiency_in_main = 0.
     efficiency_in_edge = 0.
-    efficiency_in_total = 0.
+    efficiency_in_mainplusedge = 0.
 
     if n_tracks_in_main != 0 :
         efficiency_in_main = float(n_matched)/n_tracks_in_main
@@ -1136,19 +1201,19 @@ def ComputeEfficiency(aDataSet,n_matched,n_matched_edge,edge,PlotPath, dut=6):
     else:
         efficiency_in_edge = 0.
 
-    if n_tracks_in_total != 0. :
-        efficiency_in_total = float(n_matched + n_matched_edge)/n_tracks_in_total
+    if n_tracks_in_mainplusedge != 0. :
+        efficiency_in_mainplusedge = float(n_matched + n_matched_edge)/n_tracks_in_mainplusedge
     else:
-        efficiency_in_total = 0.
+        efficiency_in_mainplusedge = 0.
        
     print "Efficiency in main : %f %%"%(efficiency_in_main*100)
     print "Efficiency in edge : %f %%"%(efficiency_in_edge*100)
-    print "Efficiency in total : %f %%"%(efficiency_in_total*100)
+    print "Efficiency in mainplusedge : %f %%"%(efficiency_in_mainplusedge*100)
 
     f = open("%s/Efficiency.txt"%PlotPath,'w')
     f.write("Efficiency in main : %f %%\n"%(efficiency_in_main*100))
     f.write("Efficiency in edge : %f %%\n"%(efficiency_in_edge*100))
-    f.write("Efficiency in total : %f %%\n"%(efficiency_in_total*100))
+    f.write("Efficiency in mainplusedge : %f %%\n"%(efficiency_in_mainplusedge*100))
     f.close()
 
 
@@ -1225,6 +1290,26 @@ def CountPixelMapRepeats(dataSet,n_proc):
 
     return histo_mapreps
 
+
+def calculateEtaCorrSigma(V_B, V_D, thickness, temperature):
+    # Calculates the sigma of diffusion
+    # V_B: bias voltage [V]
+    # V_D: depletion voltage [V]
+    # thickness of the sensor [cm]
+    # temperature: [K]
+    # TMath.K(): Boltzmann constant
+    # The diffusion sigma is in [mum]
+
+    z=0 # Depth [cm] at which sigma is calculated
+    depletionDepth=thickness*TMath.Sqrt(V_B/V_D) # [cm]
+    print "Depletion Depth=", depletionDepth
+    
+    if(depletionDepth <= thickness): # under depleted sensor
+        z=depletionDepth
+    else: # (Over)-depleted sensor
+        z=thickness
+
+    return TMath.Sqrt((TMath.K()*temperature*thickness*thickness/(echarge*V_D))*TMath.Log((V_B+V_D)/(V_B+V_D-2.0*V_D*z/thickness))) # [cm]
 
 ###############################################################################################################################
 #

@@ -26,7 +26,7 @@ parser.add_option("-o", "--output",
                   help="Histograms and results output folder", dest="OUTPUT", default=".")
 
 parser.add_option("-a", "--alignment",
-                  help="alignment file", dest="ALIGNMENT", default="alignment.dat")
+                  help="alignment file", dest="ALIGNMENT", default="Alignment.txt")
 
 parser.add_option("-e", "--edge",
                   help="edge width", dest="EDGE", default=0.0, type="float")
@@ -206,7 +206,9 @@ for i in range(0,n_proc) :
     else:
         # this is a new event, will cluster
         etacorr_sigma = 0.003
-        aDataSet.ClusterEvent(i, method_name, etacorr_sigma)
+        etacorr_sigmaGC = 0.003
+        etacorr_sigmaPbPC = 0.003
+        aDataSet.ClusterEvent(i, method_name, etacorr_sigma,etacorr_sigmaGC,etacorr_sigmaPbPC)
         clusters_tmp = aDataSet.AllClusters[i]
     prev_pixel_xhits = pixel_x_hits
 

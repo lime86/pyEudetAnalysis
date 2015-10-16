@@ -300,13 +300,15 @@ class EudetData:
             for tot,col,row in zip(self.p_tot,self.p_col,self.p_row) :
                 self.p_energyGC.append( ( globalCalib_t*globalCalib_a + tot - globalCalib_b + sqrt( ( globalCalib_b + globalCalib_t*globalCalib_a - tot )**2 + 4*globalCalib_a*globalCalib_c ) ) / (2*globalCalib_a) ) # energy in keV
 
-                if pixelCalib_a:
-                    if (( pixelCalib_b[col][row] + pixelCalib_t[col][row]*pixelCalib_a[col][row] - tot )**2 + 4*pixelCalib_a[col][row]*pixelCalib_c[col][row] > 0.) and ((2*pixelCalib_a[col][row]) != 0):
-                        self.p_energyPbPC.append( ( pixelCalib_t[col][row]*pixelCalib_a[col][row] + tot - pixelCalib_b[col][row] + sqrt( ( pixelCalib_b[col][row] + pixelCalib_t[col][row]*pixelCalib_a[col][row] - tot )**2 + 4*pixelCalib_a[col][row]*pixelCalib_c[col][row] ) ) / (2*pixelCalib_a[col][row]) )
-                    else:
-                        self.p_energyPbPC.append(0.)
+                calib_denom = 2*pixelCalib_a[col][row]
+                calib_sqrtterm = ( pixelCalib_b[col][row] + pixelCalib_t[col][row]*pixelCalib_a[col][row] - tot )**2 + 4*pixelCalib_a[col][row]*pixelCalib_c[col][row]
+
+                if (calib_sqrtterm > 0.) and (calib_denom != 0):
+                    self.p_energyPbPC.append( ( pixelCalib_t[col][row]*pixelCalib_a[col][row] + tot - pixelCalib_b[col][row] + sqrt( calib_sqrtterm ) ) / calib_denom ) # energy in keV
                 else:
                     self.p_energyPbPC.append(0.)
+                    print "Math error during pixel calibration, this pixel energy set to 0."
+
         else:
             for tot,col,row in zip(self.p_tot,self.p_col,self.p_row) :
                 self.p_energyGC.append(0.)
@@ -400,9 +402,21 @@ class EudetData:
             cluster.relX = self.pixelTree.relX
             cluster.relY = self.pixelTree.relY
             cluster.absX = self.pixelTree.absX
-            cluster.absY =      self.pixelTree.absY
+            cluster.absY = self.pixelTree.absY
             cluster.resX = self.pixelTree.resX
             cluster.resY = self.pixelTree.resY
+            cluster.relX_energyGC = self.pixelTree.relX_energyGC
+            cluster.relY_energyGC = self.pixelTree.relY_energyGC
+            cluster.absX_energyGC = self.pixelTree.absX_energyGC
+            cluster.absY_energyGC = self.pixelTree.absY_energyGC
+            cluster.resX_energyGC = self.pixelTree.resX_energyGC
+            cluster.resY_energyGC = self.pixelTree.resY_energyGC
+            cluster.relX_energyPbPC = self.pixelTree.relX_energyPbPC
+            cluster.relY_energyPbPC = self.pixelTree.relY_energyPbPC
+            cluster.absX_energyPbPC = self.pixelTree.absX_energyPbPC
+            cluster.absY_energyPbPC = self.pixelTree.absY_energyPbPC
+            cluster.resX_energyPbPC = self.pixelTree.resX_energyPbPC
+            cluster.resY_energyPbPC = self.pixelTree.resY_energyPbPC
             cluster.id = self.pixelTree.id
             cluster.trackNum = self.pixelTree.trackNum
             self.AllClusters[event].append(cluster)
@@ -500,6 +514,18 @@ class EudetData:
         absY = array( 'f', [ 0. ] )
         resX = array( 'f', [ 0. ] )
         resY = array( 'f', [ 0. ] )
+        relX_energyGC = array( 'f', [ 0. ] )
+        relY_energyGC = array( 'f', [ 0. ] )
+        absX_energyGC = array( 'f', [ 0. ] )
+        absY_energyGC = array( 'f', [ 0. ] )
+        resX_energyGC = array( 'f', [ 0. ] )
+        resY_energyGC = array( 'f', [ 0. ] )
+        relX_energyPbPC = array( 'f', [ 0. ] )
+        relY_energyPbPC = array( 'f', [ 0. ] )
+        absX_energyPbPC = array( 'f', [ 0. ] )
+        absY_energyPbPC = array( 'f', [ 0. ] )
+        resX_energyPbPC = array( 'f', [ 0. ] )
+        resY_energyPbPC = array( 'f', [ 0. ] )
         trackX = array( 'f', [ 0. ] )
         trackY = array( 'f', [ 0. ] )
         id = array( 'f', [ 0. ] )
@@ -515,10 +541,22 @@ class EudetData:
         clusterTree.Branch( 'aspectRatio', aspectRatio, 'aspectRatio/F' )
         clusterTree.Branch( 'relX', relX, 'relX/F' )
         clusterTree.Branch( 'relY', relY, 'relY/F' )
-        clusterTree.Branch( 'absX', absX, 'relX/F' )
-        clusterTree.Branch( 'absY', absY, 'relY/F' )
+        clusterTree.Branch( 'absX', absX, 'absX/F' )
+        clusterTree.Branch( 'absY', absY, 'absY/F' )
         clusterTree.Branch( 'resX', resX, 'resX/F' )
         clusterTree.Branch( 'resY', resY, 'resY/F' )
+        clusterTree.Branch( 'relX_energyGC', relX_energyGC, 'relX_energyGC/F' )
+        clusterTree.Branch( 'relY_energyGC', relY_energyGC, 'relY_energyGC/F' )
+        clusterTree.Branch( 'absX_energyGC', absX_energyGC, 'absX_energyGC/F' )
+        clusterTree.Branch( 'absY_energyGC', absY_energyGC, 'absY_energyGC/F' )
+        clusterTree.Branch( 'resX_energyGC', resX_energyGC, 'resX_energyGC/F' )
+        clusterTree.Branch( 'resY_energyGC', resY_energyGC, 'resY_energyGC/F' )
+        clusterTree.Branch( 'relX_energyPbPC', relX_energyPbPC, 'relX_energyPbPC/F' )
+        clusterTree.Branch( 'relY_energyPbPC', relY_energyPbPC, 'relY_energyPbPC/F' )
+        clusterTree.Branch( 'absX_energyPbPC', absX_energyPbPC, 'absX_energyPbPC/F' )
+        clusterTree.Branch( 'absY_energyPbPC', absY_energyPbPC, 'absY_energyPbPC/F' )
+        clusterTree.Branch( 'resX_energyPbPC', resX_energyPbPC, 'resX_energyPbPC/F' )
+        clusterTree.Branch( 'resY_energyPbPC', resY_energyPbPC, 'resY_energyPbPC/F' )
         clusterTree.Branch( 'trackX', trackX, 'trackX/F' )
         clusterTree.Branch( 'trackY', trackY, 'trackY/F' )
         clusterTree.Branch( 'id', id, 'id/I' )
@@ -572,6 +610,18 @@ class EudetData:
                 resY[0]=cluster.resY
                 absX[0]=cluster.absX
                 absY[0]=cluster.absY
+                relX_energyGC[0]=cluster.relX_energyGC
+                relY_energyGC[0]=cluster.relY_energyGC
+                resX_energyGC[0]=cluster.resX_energyGC
+                resY_energyGC[0]=cluster.resY_energyGC
+                absX_energyGC[0]=cluster.absX_energyGC
+                absY_energyGC[0]=cluster.absY_energyGC
+                relX_energyPbPC[0]=cluster.relX_energyPbPC
+                relY_energyPbPC[0]=cluster.relY_energyPbPC
+                resX_energyPbPC[0]=cluster.resX_energyPbPC
+                resY_energyPbPC[0]=cluster.resY_energyPbPC
+                absX_energyPbPC[0]=cluster.absX_energyPbPC
+                absY_energyPbPC[0]=cluster.absY_energyPbPC
                 id[0]=cluster.id
                 event[0]=j
                 trackNum[0]=cluster.tracknum
@@ -595,12 +645,12 @@ class EudetData:
         return is_in
 
 
-    def IsInGoodRegion(self,track,dut=6) : 
-    
-        if (track.trackX[track.iden.index(dut)]>=((pitchX*npix_X)/2-4*pitchX) and track.trackX[track.iden.index(dut)]<=((pitchX*npix_X)/2)) and (track.trackY[track.iden.index(dut)]>=(-(pitchY*npix_Y)/2.) and track.trackY[track.iden.index(dut)]<=((pitchY*npix_Y)/2.)) :
- 	    return true
+    def IsInMain(self,track,dut=6) : 
+
+        if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y)):
+ 	    return True
 	else : 
-	    return false
+	    return False
 
     def ComputeResiduals(self,i,dut=6) :
 
@@ -614,10 +664,10 @@ class EudetData:
                     if cluster.id == track.cluster  :
                         cluster.GetResiduals(track.trackX[track.iden.index(dut)],track.trackY[track.iden.index(dut)])
 
-                        if(self.IsInEdges(track, dut)):
-                            nmatch_in_edge += 1.
-                        else :
+                        if(self.IsInMain(track, dut)):
                             nmatch_in_main += 1.
+                        elif(self.IsInEdges(track, dut)):
+                            nmatch_in_edge += 1.
 
         return nmatch_in_main, nmatch_in_edge
 
@@ -713,8 +763,8 @@ class EudetData:
                 aTrack.trackY = posY_tmp[j*ndata:j*ndata+ndata]
                 for index,element in enumerate(aTrack.trackX) :
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-                    aTrack.trackX[index] = aTrack.trackX[index]-npix_X*pitchX/2.-pitchX/2.
-                    aTrack.trackY[index] = aTrack.trackY[index]-npix_Y*pitchY/2.-pitchY/2.
+                    aTrack.trackX[index] = aTrack.trackX[index]-halfChip_X-pitchX/2.
+                    aTrack.trackY[index] = aTrack.trackY[index]-halfChip_Y-pitchY/2.
                 aTrack.iden = iden_tmp[j*ndata:j*ndata+ndata]
                 aTrack.chi2 = chi2_tmp[j*ndata:j*ndata+ndata]
                 aTrack.trackNum = trackNum_tmp[j*ndata:j*ndata+ndata]
@@ -766,21 +816,16 @@ class EudetData:
 
                 cluster = clusters_tmp[distances.index(min(distances))]
 
-                if ((fabs(track.trackX[dut_iden])<=(halfChip_X+self.edge+TrackingRes))and(fabs(track.trackY[dut_iden])<=(halfChip_Y+self.edge+TrackingRes))):
-                    if (min(distances) < r_max) :
-                        # matched cluster
-                        cluster.id = good_count
-                        track.cluster = cluster.id
-                        cluster.tracknum = track.trackNum[dut_iden]
-                        matched_clusters.append(cluster)
-                        good_count += 1
-
-                    else :
-                        # unmatched cluster
-                        track.cluster = -11
+                if (min(distances) < r_max) :
+                    # matched cluster
+                    cluster.id = good_count
+                    track.cluster = cluster.id
+                    cluster.tracknum = track.trackNum[dut_iden]
+                    matched_clusters.append(cluster)
+                    good_count += 1
 
                 else :
-                    # track outside DUT
+                    # unmatched cluster
                     track.cluster = -11
 
             else :
@@ -879,7 +924,7 @@ class EudetData:
 
 
 
-    def ComputePosition(self,i,method="QWeighted",sigma=0.003):
+    def ComputePosition(self,i,method="QWeighted",sigma=0.003,sigmaGC=0.003,sigmaPbPC=0.003):
 
         
 	if(i<len(self.AllClusters)):
@@ -892,11 +937,11 @@ class EudetData:
                 elif (method=="maxTOT"):
                     cluster.GetMaxTOTCentroid()
                 elif (method=="EtaCorrection"):
-                    cluster.GetEtaCorrectedQWeightedCentroid(sigma)
+                    cluster.GetEtaCorrectedQWeightedCentroid(sigma,sigmaGC,sigmaPbPC)
 
 
 
-    def ClusterEvent(self,i,method="QWeighted",sigma=0.003):
+    def ClusterEvent(self,i,method="QWeighted",sigma=0.003,sigmaGC=0.003,sigmaPbPC=0.003):
 
         self.getEvent(i)
 
@@ -964,7 +1009,7 @@ class EudetData:
             elif (method=="maxTOT"):
                 cluster.GetMaxTOTCentroid()
             elif (method=="EtaCorrection"):
-                cluster.GetEtaCorrectedQWeightedCentroid(sigma)
+                cluster.GetEtaCorrectedQWeightedCentroid(sigma,sigmaGC,sigmaPbPC)
 
             cluster.id=clusterid
             clusterid+=1

@@ -25,7 +25,7 @@ parser.add_option("-o", "--output",
                   help="Histograms and results output folder", dest="OUTPUT", default=".")
 
 parser.add_option("-a", "--alignment",
-                  help="alignement file", dest="ALIGNMENT", default="alignement.dat")
+                  help="alignment file", dest="ALIGNMENT", default="Alignment.txt")
 
 parser.add_option("-e", "--edge",
                   help="edge width", dest="EDGE", default=0.0, type="float")
@@ -209,42 +209,6 @@ if len(aDataSet.AllTracks)< n_proc :
 print "Running on run %i, with Method %s, on %i Events"%(RunNumber,method_name,n_proc)
 
 
-# EdgeEfficiency
-if aDataSet.edge != 0.0:
-    TotalTrack, MatchedTrack, Efficiency, edge_tracks, edge_matched, edge_efficiencies, TOT_vs_edge = EdgeEfficiency(aDataSet,dutID)
-
-    eff_can = TCanvas()
-    MatchedTrack.Draw("")
-    eff_can.SaveAs("%s/Run%i/%s/Edge_MatchedTracks.pdf"%(PlotPath,RunNumber,method_name))
-
-    Efficiency.Draw("")
-    eff_can.SaveAs("%s/Run%i/%s/Edge_Efficiency.pdf"%(PlotPath,RunNumber,method_name))
-
-    TOT_vs_edge.Draw("colz")
-    eff_can.SaveAs("%s/Run%i/%s/Edge_TOT.pdf"%(PlotPath,RunNumber,method_name))
-
-    TotalTrack.Draw("")
-    eff_can.SaveAs("%s/Run%i/%s/Edge_Tracks.pdf"%(PlotPath,RunNumber,method_name))
-
-    edge_efficiencies[0].Draw("")
-    for i in range(1,4) :
-        edge_efficiencies[i].Draw("same")
-    eff_can.BuildLegend()
-    eff_can.SaveAs("%s/Run%i/%s/Edge_Efficiency_edge_by_edge.pdf"%(PlotPath,RunNumber,method_name))
-
-    edge_matched[0].Draw("")
-    for i in range(1,4) :
-        edge_matched[i].Draw("same")
-    eff_can.BuildLegend()
-    eff_can.SaveAs("%s/Run%i/%s/Edge_MatchedTracks_edge_by_edge.pdf"%(PlotPath,RunNumber,method_name))
-
-    edge_tracks[0].Draw("")
-    for i in range(1,4) :
-        edge_tracks[i].Draw("same")
-    eff_can.BuildLegend()
-    eff_can.SaveAs("%s/Run%i/%s/Edge_Tracks_edge_by_edge.pdf"%(PlotPath,RunNumber,method_name))
-
-
 # ComputeEfficiency
 n_matched_in_main = 0
 n_matched_in_edge = 0
@@ -252,15 +216,18 @@ last_time = time.time()
 
 
 if (method_name == "EtaCorrection") :
-    ressigmacharge = FindSigmaMin(aDataSet,aDataSet.p_nEntries,10,dutID)
-    print "ressigmacharge : %f"%float(ressigmacharge)
+    ressigmacharge, ressigmachargeGC, ressigmachargePbPC = FindSigmaMin(aDataSet,aDataSet.p_nEntries,PlotPath,RunNumber,method_name,10, dutID)
 
 else: 
     ressigmacharge=0.01
+    ressigmachargeGC=0.01
+    ressigmachargePbPC=0.01
 
 for i in range(n_proc-1) :
+
     aDataSet.FindMatchedCluster(i,searchRadius,dutID)
-    aDataSet.ComputePosition(i,method_name,ressigmacharge)
+    aDataSet.ComputePosition(i,method_name,ressigmacharge,ressigmachargeGC,ressigmachargePbPC)
+
     m,me = aDataSet.ComputeResiduals(i, dutID)
     n_matched_in_main += m
     n_matched_in_edge += me
@@ -274,6 +241,41 @@ print "Found %i matched track-cluster binome in main" %n_matched_in_main
 print "And %i matched track-cluster binome in edges" %n_matched_in_edge
 
 ComputeEfficiency(aDataSet,n_matched_in_main,n_matched_in_edge,edge_width,"%s/Run%i/%s"%(PlotPath,RunNumber,method_name), dutID)
+
+
+# EdgeEfficiency
+edge_tracks, edge_matched, edge_efficiencies, edge_tots = EdgeEfficiency(aDataSet,dutID)
+
+eff_can = TCanvas()
+edge_efficiencies[0].SetMinimum(0)
+edge_efficiencies[0].Draw("")
+for i in range(1,4) :
+    edge_efficiencies[i].Draw("same")
+eff_can.BuildLegend()
+eff_can.SaveAs("%s/Run%i/%s/Edge_Efficiency_edge_by_edge.pdf"%(PlotPath,RunNumber,method_name))
+
+edge_matched[0].SetMinimum(0)
+edge_matched[0].Draw("")
+for i in range(1,4) :
+    edge_matched[i].Draw("same")
+eff_can.BuildLegend()
+eff_can.SaveAs("%s/Run%i/%s/Edge_MatchedTracks_edge_by_edge.pdf"%(PlotPath,RunNumber,method_name))
+
+edge_tracks[0].SetMinimum(0)
+edge_tracks[0].Draw("")
+for i in range(1,4) :
+    edge_tracks[i].Draw("same")
+eff_can.BuildLegend()
+eff_can.SaveAs("%s/Run%i/%s/Edge_Tracks_edge_by_edge.pdf"%(PlotPath,RunNumber,method_name))
+
+edge_tots[0].Draw("colz")
+eff_can.SaveAs("%s/Run%i/%s/Edge_TOT_edge0.pdf"%(PlotPath,RunNumber,method_name))
+edge_tots[1].Draw("colz")
+eff_can.SaveAs("%s/Run%i/%s/Edge_TOT_edge1.pdf"%(PlotPath,RunNumber,method_name))
+edge_tots[2].Draw("colz")
+eff_can.SaveAs("%s/Run%i/%s/Edge_TOT_edge2.pdf"%(PlotPath,RunNumber,method_name))
+edge_tots[3].Draw("colz")
+eff_can.SaveAs("%s/Run%i/%s/Edge_TOT_edge3.pdf"%(PlotPath,RunNumber,method_name))
 
 
 # CountClusterSize
@@ -414,24 +416,24 @@ TOT3.SetLineColor(3)
 TOT4 = TH1D("TOT4","TOT spectrum, cluster size = 4",5000,0,10000)
 TOT4.SetLineColor(4)
 
-allEnergyGC = TH1D("allEnergyGC","EnergyGC spectrum, all cluster sizes",500,0,500)
-EnergyGC1 = TH1D("EnergyGC1","EnergyGC spectrum, cluster size = 1",500,0,500)
+allEnergyGC = TH1D("allEnergyGC","EnergyGC spectrum, all cluster sizes",5000,0,500)
+EnergyGC1 = TH1D("EnergyGC1","EnergyGC spectrum, cluster size = 1",5000,0,500)
 EnergyGC1.SetLineColor(1)
-EnergyGC2 = TH1D("EnergyGC2","EnergyGC spectrum, cluster size = 2",500,0,500)
+EnergyGC2 = TH1D("EnergyGC2","EnergyGC spectrum, cluster size = 2",5000,0,500)
 EnergyGC2.SetLineColor(2)
-EnergyGC3 = TH1D("EnergyGC3","EnergyGC spectrum, cluster size = 3",500,0,500)
+EnergyGC3 = TH1D("EnergyGC3","EnergyGC spectrum, cluster size = 3",5000,0,500)
 EnergyGC3.SetLineColor(3)
-EnergyGC4 = TH1D("EnergyGC4","EnergyGC spectrum, cluster size = 4",500,0,500)
+EnergyGC4 = TH1D("EnergyGC4","EnergyGC spectrum, cluster size = 4",5000,0,500)
 EnergyGC4.SetLineColor(4)
 
-allEnergyPbPC = TH1D("allEnergyPbPC","EnergyPbPC spectrum, all cluster sizes",500,0,500)
-EnergyPbPC1 = TH1D("EnergyPbPC1","EnergyPbPC spectrum, cluster size = 1",500,0,500)
+allEnergyPbPC = TH1D("allEnergyPbPC","EnergyPbPC spectrum, all cluster sizes",5000,0,500)
+EnergyPbPC1 = TH1D("EnergyPbPC1","EnergyPbPC spectrum, cluster size = 1",5000,0,500)
 EnergyPbPC1.SetLineColor(1)
-EnergyPbPC2 = TH1D("EnergyPbPC2","EnergyPbPC spectrum, cluster size = 2",500,0,500)
+EnergyPbPC2 = TH1D("EnergyPbPC2","EnergyPbPC spectrum, cluster size = 2",5000,0,500)
 EnergyPbPC2.SetLineColor(2)
-EnergyPbPC3 = TH1D("EnergyPbPC3","EnergyPbPC spectrum, cluster size = 3",500,0,500)
+EnergyPbPC3 = TH1D("EnergyPbPC3","EnergyPbPC spectrum, cluster size = 3",5000,0,500)
 EnergyPbPC3.SetLineColor(3)
-EnergyPbPC4 = TH1D("EnergyPbPC4","EnergyPbPC spectrum, cluster size = 4",500,0,500)
+EnergyPbPC4 = TH1D("EnergyPbPC4","EnergyPbPC spectrum, cluster size = 4",5000,0,500)
 EnergyPbPC4.SetLineColor(4)
 
 resX = TH1D("resX","Unbiased residual X, all clusters",600,-0.150,0.150)
@@ -455,12 +457,49 @@ resY_s2x2y1.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
 h1_style(resX_s2x2y1,1)
 h1_style(resY_s2x2y1,1)
 
+resXGC_s2x2y1 = TH1D("resXGC_s2x2y1","Unbiased residual X, cluster size = 2, sizeX = 2 and sizeY = 1",600,-0.150,0.150)
+resXGC_s2x2y1.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
+h1_style(resXGC_s2x2y1,1)
+resXPbPC_s2x2y1 = TH1D("resXPbPC_s2x2y1","Unbiased residual X, cluster size = 2, sizeX = 2 and sizeY = 1",600,-0.150,0.150)
+resXPbPC_s2x2y1.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
+h1_style(resXPbPC_s2x2y1,1)
+
+resX_s2x2y1_relX = TH2F("resX_s2x2y1_relX","",100,0.,15.,50,-0.050,0.050)
+resY_s2x1y2_relY = TH2F("resY_s2x1y2_relY","",100,0.,15.,50,-0.050,0.050)
+
+resXGC_s2x2y1_relX = TH2F("resXGC_s2x2y1_relX","",100,0.,15.,50,-0.050,0.050)
+resYGC_s2x1y2_relY = TH2F("resYGC_s2x1y2_relY","",100,0.,15.,50,-0.050,0.050)
+
+resXPbPC_s2x2y1_relX = TH2F("resXPbPC_s2x2y1_relX","",100,0.,15.,50,-0.050,0.050)
+resYPbPC_s2x1y2_relY = TH2F("resYPbPC_s2x1y2_relY","",100,0.,15.,50,-0.050,0.050)
+
+Qrel_s2x2y1 = TH1F("Qrel_s2x2y1","",100,0,1)
+Qrel_s2x1y2 = TH1F("Qrel_s2x1y2","",100,0,1)
+QrelGC_s2x2y1 = TH1F("QrelGC_s2x2y1","",100,0,1)
+QrelGC_s2x1y2 = TH1F("QrelGC_s2x1y2","",100,0,1)
+QrelPbPC_s2x2y1 = TH1F("QrelPbPC_s2x2y1","",100,0,1)
+QrelPbPC_s2x1y2 = TH1F("QrelPbPC_s2x1y2","",100,0,1)
+
+Qrel_s2x2y1_relX = TH2F("Qrel_s2x2y1_relX","",100,0.,15.,100,0,1)
+Qrel_s2x1y2_relY = TH2F("Qrel_s2x1y2_relY","",100,0.,15.,100,0,1)
+QrelGC_s2x2y1_relX = TH2F("QrelGC_s2x2y1_relX","",100,0.,15.,100,0,1)
+QrelGC_s2x1y2_relY = TH2F("QrelGC_s2x1y2_relY","",100,0.,15.,100,0,1)
+QrelPbPC_s2x2y1_relX = TH2F("QrelPbPC_s2x2y1_relX","",100,0.,15.,100,0,1)
+QrelPbPC_s2x1y2_relY = TH2F("QrelPbPC_s2x1y2_relY","",100,0.,15.,100,0,1)
+
 resX_s2x1y2 = TH1D("resX_s2x1y2","Unbiased residual X, cluster size = 2, sizeX = 1 and sizeY = 2",600,-0.150,0.150)
 resY_s2x1y2 = TH1D("resY_s2x1y2","Unbiased residual Y, cluster size = 2, sizeX = 1 and sizeY = 2",600,-0.150,0.150)
 resX_s2x1y2.GetXaxis().SetTitle("X_{track} - X_{Timepix} (mm)")
 resY_s2x1y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
 h1_style(resX_s2x1y2,1)
 h1_style(resY_s2x1y2,1)
+
+resYGC_s2x1y2 = TH1D("resYGC_s2x1y2","Unbiased residual Y, cluster size = 2, sizeX = 1 and sizeY = 2",600,-0.150,0.150)
+resYGC_s2x1y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
+h1_style(resYGC_s2x1y2,1)
+resYPbPC_s2x1y2 = TH1D("resYPbPC_s2x1y2","Unbiased residual Y, cluster size = 2, sizeX = 1 and sizeY = 2",600,-0.150,0.150)
+resYPbPC_s2x1y2.GetXaxis().SetTitle("Y_{track} - Y_{Timepix} (mm)")
+h1_style(resYPbPC_s2x1y2,1)
 
 resX_s2x2y2 = TH1D("resX_s2x2y2","Unbiased residual X, cluster size = 2, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
 resY_s2x2y2 = TH1D("resY_s2x2y2","Unbiased residual Y, cluster size = 2, sizeX = 2 and sizeY = 2",600,-0.150,0.150)
@@ -502,9 +541,35 @@ for j,tracks in enumerate(aDataSet.AllTracks) :
             elif(aCluster.size==2 and (aCluster.sizeX==2 and aCluster.sizeY==1)) :
                 resX_s2x2y1.Fill(aCluster.resX)
                 resY_s2x2y1.Fill(aCluster.resY)
+                resX_s2x2y1_relX.Fill(aCluster.relX, aCluster.resX)
+                Qrel_s2x2y1.Fill(aCluster.tot[aCluster.col.index(min(aCluster.col))] / aCluster.totalTOT)
+                Qrel_s2x2y1_relX.Fill(aCluster.relX,aCluster.tot[aCluster.col.index(min(aCluster.col))] / aCluster.totalTOT)
+                if ((aCluster.totalEnergyGC > 0) and (0 not in aCluster.energyGC)):
+                    resXGC_s2x2y1.Fill(aCluster.resX_energyGC)
+                    resXGC_s2x2y1_relX.Fill(aCluster.relX, aCluster.resX_energyGC)
+                    QrelGC_s2x2y1.Fill(aCluster.energyGC[aCluster.col.index(min(aCluster.col))] / aCluster.totalEnergyGC)
+                    QrelGC_s2x2y1_relX.Fill(aCluster.relX,aCluster.energyGC[aCluster.col.index(min(aCluster.col))] / aCluster.totalEnergyGC)
+                if ((aCluster.totalEnergyPbPC > 0) and (0 not in aCluster.energyPbPC)):
+                    resXPbPC_s2x2y1.Fill(aCluster.resX_energyPbPC)
+                    resXPbPC_s2x2y1_relX.Fill(aCluster.relX, aCluster.resX_energyPbPC)
+                    QrelPbPC_s2x2y1.Fill(aCluster.energyPbPC[aCluster.col.index(min(aCluster.col))] / aCluster.totalEnergyPbPC)
+                    QrelPbPC_s2x2y1_relX.Fill(aCluster.relX,aCluster.energyPbPC[aCluster.col.index(min(aCluster.col))] / aCluster.totalEnergyPbPC)
             elif(aCluster.size==2 and (aCluster.sizeX==1 and aCluster.sizeY==2)) :
                 resX_s2x1y2.Fill(aCluster.resX)
                 resY_s2x1y2.Fill(aCluster.resY)
+                resY_s2x1y2_relY.Fill(aCluster.relY, aCluster.resY)
+                Qrel_s2x1y2.Fill(aCluster.tot[aCluster.row.index(min(aCluster.row))] / aCluster.totalTOT)
+                Qrel_s2x1y2_relY.Fill(aCluster.relY,aCluster.tot[aCluster.row.index(min(aCluster.row))] / aCluster.totalTOT)
+                if ((aCluster.totalEnergyGC > 0) and (0 not in aCluster.energyGC)):
+                    resYGC_s2x1y2.Fill(aCluster.resY_energyGC)
+                    resYGC_s2x1y2_relY.Fill(aCluster.relY, aCluster.resY_energyGC)
+                    QrelGC_s2x1y2.Fill(aCluster.energyGC[aCluster.row.index(min(aCluster.row))] / aCluster.totalEnergyGC)
+                    QrelGC_s2x1y2_relY.Fill(aCluster.relY,aCluster.energyGC[aCluster.row.index(min(aCluster.row))] / aCluster.totalEnergyGC)
+                if ((aCluster.totalEnergyPbPC > 0) and (0 not in aCluster.energyPbPC)):
+                    resYPbPC_s2x1y2.Fill(aCluster.resY_energyPbPC)
+                    resYPbPC_s2x1y2_relY.Fill(aCluster.relY, aCluster.resY_energyPbPC)
+                    QrelPbPC_s2x1y2.Fill(aCluster.energyPbPC[aCluster.row.index(min(aCluster.row))] / aCluster.totalEnergyPbPC)
+                    QrelPbPC_s2x1y2_relY.Fill(aCluster.relY,aCluster.energyPbPC[aCluster.row.index(min(aCluster.row))] / aCluster.totalEnergyPbPC)
             elif(aCluster.size==3 and (aCluster.sizeX==2 and aCluster.sizeY==2)) :
                 resX_s3x2y2.Fill(aCluster.resX)
                 resY_s3x2y2.Fill(aCluster.resY)
@@ -570,6 +635,64 @@ resY_s2x2y1.Draw()
 resY_s2x2y1.Fit("gaus","R","",-0.03,0.03)
 canvas_resY_s2x2y1.SaveAs("%s/Run%i/%s/resY_s2x2y1.pdf"%(PlotPath,RunNumber,method_name))
 
+canvas_resXGC_s2x2y1 = TCanvas()
+resXGC_s2x2y1.Draw()
+resXGC_s2x2y1.Fit("gaus","R","",-0.03,0.03)
+canvas_resXGC_s2x2y1.SaveAs("%s/Run%i/%s/resXGC_s2x2y1.pdf"%(PlotPath,RunNumber,method_name))
+
+canvas_resXPbPC_s2x2y1 = TCanvas()
+resXPbPC_s2x2y1.Draw()
+resXPbPC_s2x2y1.Fit("gaus","R","",-0.03,0.03)
+canvas_resXPbPC_s2x2y1.SaveAs("%s/Run%i/%s/resXPbPC_s2x2y1.pdf"%(PlotPath,RunNumber,method_name))
+
+canvas_resX_s2x2y1_relX = TCanvas()
+resX_s2x2y1_relX.Draw("cont4")
+canvas_resX_s2x2y1_relX.SaveAs("%s/Run%i/%s/resX_s2x2y1_relX.pdf"%(PlotPath,RunNumber,method_name))
+
+canvas_resXGC_s2x2y1_relX = TCanvas()
+resXGC_s2x2y1_relX.Draw("cont4")
+canvas_resXGC_s2x2y1_relX.SaveAs("%s/Run%i/%s/resXGC_s2x2y1_relX.pdf"%(PlotPath,RunNumber,method_name))
+
+canvas_resXPbPC_s2x2y1_relX = TCanvas()
+resXPbPC_s2x2y1_relX.Draw("cont4")
+canvas_resXPbPC_s2x2y1_relX.SaveAs("%s/Run%i/%s/resXPbPC_s2x2y1_relX.pdf"%(PlotPath,RunNumber,method_name))
+
+resX_s2x2y1_relX.FitSlicesY(0, 0, -1, 0, "QNR G5")
+resX_s2x2y1_relX_1 = gDirectory.Get("resX_s2x2y1_relX_1")
+resX_s2x2y1_relX_2 = gDirectory.Get("resX_s2x2y1_relX_2")
+
+resXGC_s2x2y1_relX.FitSlicesY(0, 0, -1, 0, "QNR G5")
+resXGC_s2x2y1_relX_1 = gDirectory.Get("resXGC_s2x2y1_relX_1")
+resXGC_s2x2y1_relX_2 = gDirectory.Get("resXGC_s2x2y1_relX_2")
+
+resXPbPC_s2x2y1_relX.FitSlicesY(0, 0, -1, 0, "QNR G5")
+resXPbPC_s2x2y1_relX_1 = gDirectory.Get("resXPbPC_s2x2y1_relX_1")
+resXPbPC_s2x2y1_relX_2 = gDirectory.Get("resXPbPC_s2x2y1_relX_2")
+
+canvas_resY_s2x1y2_relY = TCanvas()
+resY_s2x1y2_relY.Draw("cont4")
+canvas_resY_s2x1y2_relY.SaveAs("%s/Run%i/%s/resY_s2x1y2_relY.pdf"%(PlotPath,RunNumber,method_name))
+
+canvas_resYGC_s2x1y2_relY = TCanvas()
+resYGC_s2x1y2_relY.Draw("cont4")
+canvas_resYGC_s2x1y2_relY.SaveAs("%s/Run%i/%s/resYGC_s2x1y2_relY.pdf"%(PlotPath,RunNumber,method_name))
+
+canvas_resYPbPC_s2x1y2_relY = TCanvas()
+resYPbPC_s2x1y2_relY.Draw("cont4")
+canvas_resYPbPC_s2x1y2_relY.SaveAs("%s/Run%i/%s/resYPbPC_s2x1y2_relY.pdf"%(PlotPath,RunNumber,method_name))
+
+resY_s2x1y2_relY.FitSlicesY(0, 0, -1, 0, "QNR G5")
+resY_s2x1y2_relY_1 = gDirectory.Get("resY_s2x1y2_relY_1")
+resY_s2x1y2_relY_2 = gDirectory.Get("resY_s2x1y2_relY_2")
+
+resYGC_s2x1y2_relY.FitSlicesY(0, 0, -1, 0, "QNR G5")
+resYGC_s2x1y2_relY_1 = gDirectory.Get("resYGC_s2x1y2_relY_1")
+resYGC_s2x1y2_relY_2 = gDirectory.Get("resYGC_s2x1y2_relY_2")
+
+resYPbPC_s2x1y2_relY.FitSlicesY(0, 0, -1, 0, "QNR G5")
+resYPbPC_s2x1y2_relY_1 = gDirectory.Get("resYPbPC_s2x1y2_relY_1")
+resYPbPC_s2x1y2_relY_2 = gDirectory.Get("resYPbPC_s2x1y2_relY_2")
+
 canvas_resX_s2x1y2 = TCanvas()
 resX_s2x1y2.Draw()
 resX_s2x1y2.Fit("gaus","R","",-0.03,0.03)
@@ -579,6 +702,16 @@ canvas_resY_s2x1y2 = TCanvas()
 resY_s2x1y2.Draw()
 resY_s2x1y2.Fit("gaus","R","",-0.03,0.03)
 canvas_resY_s2x1y2.SaveAs("%s/Run%i/%s/resY_s2x1y2.pdf"%(PlotPath,RunNumber,method_name))
+
+canvas_resYGC_s2x1y2 = TCanvas()
+resYGC_s2x1y2.Draw()
+resYGC_s2x1y2.Fit("gaus","R","",-0.03,0.03)
+canvas_resYGC_s2x1y2.SaveAs("%s/Run%i/%s/resYGC_s2x1y2.pdf"%(PlotPath,RunNumber,method_name))
+
+canvas_resYPbPC_s2x1y2 = TCanvas()
+resYPbPC_s2x1y2.Draw()
+resYPbPC_s2x1y2.Fit("gaus","R","",-0.03,0.03)
+canvas_resYPbPC_s2x1y2.SaveAs("%s/Run%i/%s/resYPbPC_s2x1y2.pdf"%(PlotPath,RunNumber,method_name))
 
 canvas_resX_s3x2y2 = TCanvas()
 resX_s3x2y2.Draw()
@@ -1090,15 +1223,11 @@ out.cd()
 
 h_chi2.Write()
 h_chi2ndof.Write()
-if aDataSet.edge != 0.0:
-    MatchedTrack.Write()
-    Efficiency.Write()
-    TOT_vs_edge.Write()
-    TotalTrack.Write()
-    for i in range(4) :
-        edge_efficiencies[i].Write()
-        edge_matched[i].Write()
-        edge_tracks[i].Write()
+for i in range(4) :
+    edge_efficiencies[i].Write()
+    edge_matched[i].Write()
+    edge_tracks[i].Write()
+    edge_tots[i].Write()
 hClusterSize.Write()
 hClusterSizeX.Write()
 hClusterSizeY.Write()
@@ -1120,6 +1249,40 @@ resX_s3x2y2.Write()
 resY_s3x2y2.Write()
 resX_s4x2y2.Write()
 resY_s4x2y2.Write()
+resXGC_s2x2y1.Write()
+resXPbPC_s2x2y1.Write()
+resYGC_s2x1y2.Write()
+resYPbPC_s2x1y2.Write()
+resX_s2x2y1_relX.Write()
+resX_s2x2y1_relX_1.Write()
+resX_s2x2y1_relX_2.Write()
+resXGC_s2x2y1_relX.Write()
+resXGC_s2x2y1_relX_1.Write()
+resXGC_s2x2y1_relX_2.Write()
+resXPbPC_s2x2y1_relX.Write()
+resXPbPC_s2x2y1_relX_1.Write()
+resXPbPC_s2x2y1_relX_2.Write()
+resY_s2x1y2_relY.Write()
+resY_s2x1y2_relY_1.Write()
+resY_s2x1y2_relY_2.Write()
+resYGC_s2x1y2_relY.Write()
+resYGC_s2x1y2_relY_1.Write()
+resYGC_s2x1y2_relY_2.Write()
+resYPbPC_s2x1y2_relY.Write()
+resYPbPC_s2x1y2_relY_1.Write()
+resYPbPC_s2x1y2_relY_2.Write()
+Qrel_s2x2y1.Write()
+QrelGC_s2x2y1.Write()
+QrelPbPC_s2x2y1.Write()
+Qrel_s2x1y2.Write()
+QrelGC_s2x1y2.Write()
+QrelPbPC_s2x1y2.Write()
+Qrel_s2x2y1_relX.Write()
+Qrel_s2x1y2_relY.Write()
+QrelGC_s2x2y1_relX.Write()
+QrelGC_s2x1y2_relY.Write()
+QrelPbPC_s2x2y1_relX.Write()
+QrelPbPC_s2x1y2_relY.Write()
 allTOT.Write()
 TOT1.Write()
 TOT2.Write()

@@ -136,12 +136,20 @@ else:
     skip = 1
 print "Running on run %i, with method %s, on %i events with skip %i" %(RunNumber,method_name,n_proc,skip)
 
-AlignmentPath = "%s/Run%i/Alignment_%i_%s_%i_%i.txt" %(PlotPath,RunNumber,RunNumber,method_name,int(options.NEVENT),skip)
+AlignmentPath = "%s/Run%i/alignment_%i_%s_%i_%i.txt" %(PlotPath,RunNumber,RunNumber,method_name,int(options.NEVENT),skip)
 print "Alignment path will be", AlignmentPath
 
 prev_pixel_xhits = [999, 999]
 clusters_tmp = []
 last_time=time.time()
+
+# Load hot pixels
+hotpixel_filename = "%s/Run%i/HotPixels_%i_0.01.txt" %(PlotPath,RunNumber,RunNumber)
+print "Hotpixel filename:", hotpixel_filename
+if os.path.isfile(hotpixel_filename):
+    aDataSet.LoadHotPixel(hotpixel_filename)
+else:
+    print "WARNING no hot pixel file found. No hot pixels set"
 
 for i in range(0,n_proc) :
     aDataSet.getEvent(i)

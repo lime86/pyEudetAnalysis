@@ -7,7 +7,7 @@
 import future_builtins
 SensorType=future_builtins.SensorType
 Assembly=future_builtins.Assembly
-from os import environ
+from os import environ, path
 #import ToolBox
 
 # this should really stay in ToolBox, why can't I import it?
@@ -91,66 +91,93 @@ scaler =1
 home = environ['HOME']
 
 # calibration constants
-if Assembly == "B06-W0126":
-    print "Taking calibration constants for B06-W0126"
-    globalCalib_a = 30.07
-    globalCalib_b = 513.4
-    globalCalib_c = 1793.0
-    globalCalib_t = 0.4356
+if Assembly == "B06-W0125":
+    print "Taking calibration constants for B06-W0125"
+    globalCalib_a = 30.8
+    globalCalib_b = 484.3
+    globalCalib_c = 1301.0
+    globalCalib_t = 1.65
 
     pixelCalib_file = "%s/eos/clicdp/data/VertexCalibration/LatestResults/B06-W0125_KDECalibration_Pixels.root" %home
-    pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
+    if path.isfile(pixelCalib_file):
+        pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
+    else:
+        print "Error, can't find pixel calibration file. You probably need to mount eos. Read README."
+        exit()
 
 elif Assembly == "A06-W0110":
     print "Taking calibration constants for A06-W0110"
-    globalCalib_a = 13.45
-    globalCalib_b = 351.4
-    globalCalib_c = 1249.0
-    globalCalib_t = 0.2151
+    globalCalib_a = 12.76
+    globalCalib_b = 399.3
+    globalCalib_c = 2104.0
+    globalCalib_t = -1.663
 
     pixelCalib_file = "%s/eos/clicdp/data/VertexCalibration/LatestResults/A06-W0110_KDECalibration_Pixels.root" %home
-    pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
+    if path.isfile(pixelCalib_file):
+        pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
+    else:
+        print "Error, can't find pixel calibration file. You probably need to mount eos. Read README."
+        exit()
 
 elif Assembly == "D09-W0126":
     print "Taking calibration constants for D09-W0126"
-    globalCalib_a = 16.72
-    globalCalib_b = 499.8
-    globalCalib_c = 1805.0
-    globalCalib_t = 0.125
+    globalCalib_a = 17.49
+    globalCalib_b = 449.6
+    globalCalib_c = 1132.0
+    globalCalib_t = 1.727
 
     pixelCalib_file = "%s/eos/clicdp/data/VertexCalibration/LatestResults/D09-W0126_KDECalibration_Pixels.root" %home
-    pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
+    if path.isfile(pixelCalib_file):
+        pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
+    else:
+        print "Error, can't find pixel calibration file. You probably need to mount eos. Read README."
+        exit()
 
 elif Assembly == "B07-W0125":
     print "Taking calibration constants for B07-W0125"
-    globalCalib_a = 14.04
-    globalCalib_b = 424.3
-    globalCalib_c = 2366.0
-    globalCalib_t = -1.637
+    globalCalib_a = 14.1
+    globalCalib_b = 405.7
+    globalCalib_c = 2148.0
+    globalCalib_t = -1.408
 
     pixelCalib_file = "%s/eos/clicdp/data/VertexCalibration/LatestResults/B07-W0125_KDECalibration_Pixels.root" %home
-    pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
+    if path.isfile(pixelCalib_file):
+        pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
+    else:
+        print "Error, can't find pixel calibration file. You probably need to mount eos. Read README."
+        exit()
 
 elif Assembly == "L04-W0125":
     print "Taking calibration constants for L04-W0125"
-    globalCalib_a = 15.58
-    globalCalib_b = 382.7
-    globalCalib_c = 1756.0
-    globalCalib_t = -0.6598
+    globalCalib_a = 15.36
+    globalCalib_b = 414.0
+    globalCalib_c = 2026.0
+    globalCalib_t = -1.043
 
     pixelCalib_file = "%s/eos/clicdp/data/VertexCalibration/LatestResults/L04-W0125_KDECalibration_Pixels.root" %home
-    pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
+    if path.isfile(pixelCalib_file):
+        pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
+    else:
+        print "Error, can't find pixel calibration file. You probably need to mount eos. Read README."
+        exit()
 
 elif Assembly == "C04-W0110":
     print "Taking calibration constants for C04-W0110"
-    globalCalib_a = 14.1
-    globalCalib_b = 292.3
-    globalCalib_c = 780.2
-    globalCalib_t = 1.074
+    globalCalib_a = 14.56
+    globalCalib_b = 289.4
+    globalCalib_c = 869.3
+    globalCalib_t = 0.4814
 
     pixelCalib_file = "%s/eos/clicdp/data/VertexCalibration/LatestResults/C04-W0110_KDECalibration_Pixels.root" %home
-    pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
+    if path.isfile(pixelCalib_file):
+        pixelCalib_a,pixelCalib_b,pixelCalib_c,pixelCalib_t = ReadCalibFile(pixelCalib_file)
+    else:
+        print "Error, can't find pixel calibration file. You probably need to mount eos. Read README."
+        exit()
 
 else:
     print "Assembly not defined or not recognised. No calibration constants loaded."
     future_builtins.Assembly="AssemblyNotDefined"
+
+# Elementary charge
+echarge=1.60217646e-19 # [C=As]
