@@ -214,7 +214,7 @@ for i in range(0,n_proc) :
     for alignment in alignment_constants :
         ApplyAlignment_at_event(i,aDataSet,[alignment[3],alignment[4],0],[alignment[0],alignment[1],alignment[2]], dutID)
 
-    aDataSet.FindMatchedCluster(i,0.3, dutID,distances_histo_afterpreali)
+    aDataSet.FindMatchedCluster(i,searchRadiusPreAlignment, dutID,distances_histo_afterpreali)
     a,b=aDataSet.ComputeResiduals(i, dutID)
     if i%1000 ==0 :
         print "Event %d"%i
@@ -234,7 +234,7 @@ tccorx2.Draw("colz")
 cancory2 = TCanvas()
 tccory2.Draw("colz")
 
-max_matched_dist = 0.1
+max_matched_dist = searchRadiusAlignment
 resr,rest = PerformAlignement(aDataSet,n_proc,skip,max_matched_dist,AlignmentPath,dutID)
 ApplyAlignment(aDataSet,rest,resr,dutID)
 
@@ -252,7 +252,7 @@ distances_histo_afterfullali = TH1F("distances_histo_afterfullali","",100,0.0,1.
 
 for i in range(0,n_proc) :
 
-    aDataSet.FindMatchedCluster(i,0.3, dutID,distances_histo_afterfullali)
+    aDataSet.FindMatchedCluster(i,searchRadius, dutID,distances_histo_afterfullali)
     a,b=aDataSet.ComputeResiduals(i, dutID)
     n_matched+=a
     if i%1000 ==0 :

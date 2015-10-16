@@ -147,7 +147,9 @@ def h1_style(h, optstat=0) :
     h.SetTitleFont(42, "XYZ")
     
 def SquareCanvas(can):
-    can.SetWindowSize(1024,1024)
+    aspectRatio = pitchX/pitchY
+
+    can.SetWindowSize(int(aspectRatio*1024),1024)
 
 def TGraph_style (h) :
     h.GetXaxis().SetLabelOffset(0.005)
@@ -222,8 +224,10 @@ else:
     ressigmachargePbPC=0.01
 
 for i in range(n_proc-1) :
-    aDataSet.FindMatchedCluster(i,0.1,dutID)
+
+    aDataSet.FindMatchedCluster(i,searchRadius,dutID)
     aDataSet.ComputePosition(i,method_name,ressigmacharge,ressigmachargeGC,ressigmachargePbPC)
+
     m,me = aDataSet.ComputeResiduals(i, dutID)
     n_matched_in_main += m
     n_matched_in_edge += me
