@@ -217,7 +217,7 @@ for i in range(0,n_proc) :
     for alignement in alignment_constants :
         ApplyAlignment_at_event(i,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]], dutID)
 
-    aDataSet.FindMatchedCluster(i,0.1,dutID,distances_histo)
+    aDataSet.FindMatchedCluster(i,searchRadius,dutID,distances_histo)
     m,me=aDataSet.ComputeResiduals(i, dutID)
     n_matched+=m
     n_matched_edge+=me

@@ -39,6 +39,11 @@ if "Timepix" in SensorType :
     npix_X = 256
     npix_Y = 256
     
+    searchRadiusPreAlignment = 0.3 #search radius for tracks in mm  
+    searchRadiusAlignment = 0.1 #search radius for tracks in mm
+    searchRadius = 0.1 #search radius for tracks in mm
+
+    
     print "Using Timepix or Timepix3 detector"
 
 
@@ -51,7 +56,11 @@ elif SensorType=="FEI4" :
     
     print "Using FEI4 detector"
 
-    
+    searchRadiusPreAlignment = 0.8 #search radius for tracks in mm  
+    searchRadiusAlignment = 0.4 #search radius for tracks in mm
+    searchRadius = 0.4 #search radius for tracks in mm
+
+   
 
 elif SensorType=="CLICpix" : 
 # CLICPix Specifications
@@ -62,6 +71,9 @@ elif SensorType=="CLICpix" :
     
     print "Using CLICpix detector"
 
+    searchRadiusPreAlignment = 0.3 #search radius for tracks in mm  
+    searchRadiusAlignment = 0.1 #search radius for tracks in mm
+    searchRadius = 0.1 #search radius for tracks in mm
 
 halfChip_X = npix_X*pitchX/2.
 halfChip_Y = npix_Y*pitchY/2.
@@ -79,8 +91,8 @@ scaler =1
 home = environ['HOME']
 
 # calibration constants
-if Assembly == "B06-W0126":
-    print "Taking calibration constants for B06-W0126"
+if Assembly == "B06-W0125":
+    print "Taking calibration constants for B06-W0125"
     globalCalib_a = 30.8
     globalCalib_b = 484.3
     globalCalib_c = 1301.0
