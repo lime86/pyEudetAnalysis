@@ -645,12 +645,12 @@ class EudetData:
         return is_in
 
 
-    def IsInGoodRegion(self,track,dut=6) : 
-    
-        if (track.trackX[track.iden.index(dut)]>=((pitchX*npix_X)/2-4*pitchX) and track.trackX[track.iden.index(dut)]<=((pitchX*npix_X)/2)) and (track.trackY[track.iden.index(dut)]>=(-(pitchY*npix_Y)/2.) and track.trackY[track.iden.index(dut)]<=((pitchY*npix_Y)/2.)) :
- 	    return true
+    def IsInMain(self,track,dut=6) : 
+
+        if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y)):
+ 	    return True
 	else : 
-	    return false
+	    return False
 
     def ComputeResiduals(self,i,dut=6) :
 
@@ -664,10 +664,10 @@ class EudetData:
                     if cluster.id == track.cluster  :
                         cluster.GetResiduals(track.trackX[track.iden.index(dut)],track.trackY[track.iden.index(dut)])
 
-                        if(self.IsInEdges(track, dut)):
-                            nmatch_in_edge += 1.
-                        else :
+                        if(self.IsInMain(track, dut)):
                             nmatch_in_main += 1.
+                        elif(self.IsInEdges(track, dut)):
+                            nmatch_in_edge += 1.
 
         return nmatch_in_main, nmatch_in_edge
 
@@ -763,8 +763,8 @@ class EudetData:
                 aTrack.trackY = posY_tmp[j*ndata:j*ndata+ndata]
                 for index,element in enumerate(aTrack.trackX) :
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-                    aTrack.trackX[index] = aTrack.trackX[index]-npix_X*pitchX/2.-pitchX/2.
-                    aTrack.trackY[index] = aTrack.trackY[index]-npix_Y*pitchY/2.-pitchY/2.
+                    aTrack.trackX[index] = aTrack.trackX[index]-halfChip_X-pitchX/2.
+                    aTrack.trackY[index] = aTrack.trackY[index]-halfChip_Y-pitchY/2.
                 aTrack.iden = iden_tmp[j*ndata:j*ndata+ndata]
                 aTrack.chi2 = chi2_tmp[j*ndata:j*ndata+ndata]
                 aTrack.trackNum = trackNum_tmp[j*ndata:j*ndata+ndata]
@@ -816,21 +816,16 @@ class EudetData:
 
                 cluster = clusters_tmp[distances.index(min(distances))]
 
-                if ((fabs(track.trackX[dut_iden])<=(halfChip_X+self.edge+TrackingRes))and(fabs(track.trackY[dut_iden])<=(halfChip_Y+self.edge+TrackingRes))):
-                    if (min(distances) < r_max) :
-                        # matched cluster
-                        cluster.id = good_count
-                        track.cluster = cluster.id
-                        cluster.tracknum = track.trackNum[dut_iden]
-                        matched_clusters.append(cluster)
-                        good_count += 1
-
-                    else :
-                        # unmatched cluster
-                        track.cluster = -11
+                if (min(distances) < r_max) :
+                    # matched cluster
+                    cluster.id = good_count
+                    track.cluster = cluster.id
+                    cluster.tracknum = track.trackNum[dut_iden]
+                    matched_clusters.append(cluster)
+                    good_count += 1
 
                 else :
-                    # track outside DUT
+                    # unmatched cluster
                     track.cluster = -11
 
             else :
