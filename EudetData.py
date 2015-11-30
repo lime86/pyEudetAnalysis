@@ -648,9 +648,6 @@ class EudetData:
                 is_in=False
         return is_in
 
-
-<<<<<<< HEAD
-=======
     def IsInMain(self,track,dut=6) : 
 
         if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y)):
@@ -658,7 +655,6 @@ class EudetData:
 	else : 
 	    return False
 
->>>>>>> 58a90e2aadbe7b4981d6979a649403852bb6240b
     def ComputeResiduals(self,i,dut=6) :
 
         nmatch_in_main = 0.
