@@ -648,12 +648,13 @@ class EudetData:
                 is_in=False
         return is_in
 
-    def IsInMain(self,track,dut=6) : 
+
+    def IsInMain(self,track,dut=6) :
 
         if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y)):
- 	    return True
-	else : 
-	    return False
+            return True
+        else :
+            return False
 
     def ComputeResiduals(self,i,dut=6) :
 

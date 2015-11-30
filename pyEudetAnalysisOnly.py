@@ -10,7 +10,7 @@ import future_builtins
 parser = OptionParser()
 
 parser.add_option("-r", "--run",
-                  help="Run Number", dest="RUN", type="int")
+                  help="Run Number", dest="RUN", type="str")
 
 parser.add_option("-n", "--nevent",
                   help="Number of events to process", dest="NEVENT")
@@ -38,6 +38,7 @@ parser.add_option("-i", "--dut ID",
 
 parser.add_option("-b", "--assembly",
                   help="Assembly name", dest="ASSEMBLY", default="AssemblyNotDefined")
+parser.add_option("-B", "--batch", dest="BATCH", help="Batch", action="store_true", default=False)
 
 (options, args) = parser.parse_args()
 
@@ -127,7 +128,7 @@ from ToolBox import *
 import pyximport; pyximport.install(pyimport=True)
 from EudetData import *
 from array import array
-#gROOT.SetBatch(True)
+gROOT.SetBatch(options.BATCH)
 
 alignment_constants = ReadAlignment(AlignementPath)
 

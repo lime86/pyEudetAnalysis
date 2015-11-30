@@ -10,7 +10,7 @@ import future_builtins
 
 parser = OptionParser()
 parser.add_option("-r", "--run",
-                  help="Run number", dest="RUN", type="int")
+                  help="Run number", dest="RUN", type="str")
 
 parser.add_option("-n", "--nevent",
                   help="Number of events to process", dest="NEVENT")
@@ -35,7 +35,7 @@ parser.add_option("-i", "--dut ID",
 
 parser.add_option("-b", "--assembly",
                   help="Assembly name", dest="ASSEMBLY", default="AssemblyNotDefined")
-
+parser.add_option("-B", "--batch", dest="BATCH", help="Batch", action="store_true", default=False)
 (options, args) = parser.parse_args()
 
 if(options.RUN) :
@@ -111,7 +111,7 @@ from ToolBox import *
 import pyximport; pyximport.install(pyimport=True)
 from EudetData import *
 from array import array
-
+gROOT.SetBatch(options.BATCH)
 
 gStyle.SetOptStat("nemruoi")
 gStyle.SetOptFit(1111)
@@ -144,9 +144,7 @@ clusters_tmp = []
 last_time=time.time()
 
 # Load hot pixels
-
 hotpixel_filename = "%s/Run%i/HotPixels_%i_%i_0.01.txt" %(PlotPath,RunNumber,RunNumber,dutID)
-
 print "Hotpixel filename:", hotpixel_filename
 if os.path.isfile(hotpixel_filename):
     aDataSet.LoadHotPixel(hotpixel_filename)
