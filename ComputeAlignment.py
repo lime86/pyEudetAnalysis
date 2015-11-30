@@ -143,6 +143,14 @@ prev_pixel_xhits = [999, 999]
 clusters_tmp = []
 last_time=time.time()
 
+# Load hot pixels
+hotpixel_filename = "%s/Run%i/HotPixels_%i_%i_0.01.txt" %(PlotPath,RunNumber,RunNumber,dutID)
+print "Hotpixel filename:", hotpixel_filename
+if os.path.isfile(hotpixel_filename):
+    aDataSet.LoadHotPixel(hotpixel_filename)
+else:
+    print "WARNING no hot pixel file found. No hot pixels set"
+
 for i in range(0,n_proc) :
     aDataSet.getEvent(i)
 
@@ -150,7 +158,8 @@ for i in range(0,n_proc) :
     npixels_hit = len(aDataSet.p_col)
     pixel_x_hits = []
     for k in xrange(npixels_hit):
-        pixel_x_hits.append(aDataSet.p_col[k])
+        if aDataSet.p_iden[k] == dutID:
+            pixel_x_hits.append(aDataSet.p_col[k])
 
     if (pixel_x_hits == prev_pixel_xhits ):
         # same pixel map as before, will add clusters already computed
@@ -163,11 +172,11 @@ for i in range(0,n_proc) :
         etacorr_sigma = 0.009 # 200um
         #etacorr_sigma = 0.013 # 300um
         #etacorr_sigma = 0.010 # 500um
-        aDataSet.ClusterEvent(i, method_name, etacorr_sigma)
+        aDataSet.ClusterEvent(i, method_name, etacorr_sigma, dut=dutID)
         clusters_tmp = aDataSet.AllClusters[i]
     prev_pixel_xhits = pixel_x_hits
 
-    aDataSet.GetTrack(i)
+    aDataSet.GetTrack(i,dutID)
     if i%1000 ==0 :
         print "Event %d"%i
         print "Elapsed time/1000 Event. Clustering : %f s"%(time.time()-last_time)

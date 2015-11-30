@@ -198,7 +198,8 @@ for i in range(0,n_proc) :
     npixels_hit = len(aDataSet.p_col)
     pixel_x_hits = []
     for k in xrange(npixels_hit):
-        pixel_x_hits.append(aDataSet.p_col[k])
+        if aDataSet.p_iden[k] == dutID:
+            pixel_x_hits.append(aDataSet.p_col[k])
 
     if (pixel_x_hits == prev_pixel_xhits):
         # same pixel map as before, will add clusters already computed
@@ -208,11 +209,11 @@ for i in range(0,n_proc) :
         etacorr_sigma = 0.003
         etacorr_sigmaGC = 0.003
         etacorr_sigmaPbPC = 0.003
-        aDataSet.ClusterEvent(i, method_name, etacorr_sigma,etacorr_sigmaGC,etacorr_sigmaPbPC)
+        aDataSet.ClusterEvent(i, method_name, etacorr_sigma,etacorr_sigmaGC,etacorr_sigmaPbPC,dutID)
         clusters_tmp = aDataSet.AllClusters[i]
     prev_pixel_xhits = pixel_x_hits
 
-    aDataSet.GetTrack(i)
+    aDataSet.GetTrack(i,dutID)
 
     for alignement in alignment_constants :
         ApplyAlignment_at_event(i,aDataSet,[alignement[3],alignement[4],0],[alignement[0],alignement[1],alignement[2]], dutID)

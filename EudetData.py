@@ -88,11 +88,11 @@ class EudetData:
 #     p_euEv = []
 
     #hotpixel firing matrix
-    #hit_map = [[0]*npix_Y]*npix_X
-    #frequency_map = [[0.0]*npix_Y]*npix_X
+    hit_map = [[0]*npix_Y]*npix_X
+    frequency_map = [[0.0]*npix_Y]*npix_X
 
-    hit_map =[[0 for x in xrange(npix_X)] for x in xrange(npix_Y)]
-    frequency_map = [[0 for x in xrange(npix_X)] for x in xrange(npix_Y)]
+    #hit_map =[[0 for x in xrange(npix_X)] for x in xrange(npix_Y)]
+    #frequency_map = [[0 for x in xrange(npix_X)] for x in xrange(npix_Y)]
     hotpixels = []
 
     mode = ""
@@ -138,6 +138,7 @@ class EudetData:
 
         self.EnergyCut=ECut
         self.frequency_map = [[0.0]*npix_Y]*npix_X
+        
         for i in range(len(self.hit_map)):
             for j in range(len(self.hit_map[0])):
                 self.hit_map[i][j]=0
@@ -168,7 +169,7 @@ class EudetData:
 
 
 
-    def FindHotPixel(self,threshold,Nevents=-1,filename="hotpixels.txt"):
+    def FindHotPixel(self,threshold,Nevents=-1,filename="hotpixels.txt",dut=6):
 
         # will calculate the frequency with which each pixel fires
         # threshold (0 -> 1) defines hot pixel cut
@@ -206,10 +207,12 @@ class EudetData:
                 print " [Hot Pixel Finder] Parsing event %i" %i
 
             # is this a new frame, or the next event in the same frame?
+           
             npixels_hit = len(self.p_col)
             pixel_x_hits = []
             for k in xrange(npixels_hit):
-                pixel_x_hits.append(self.p_col[k])
+                if self.p_iden[k] == dut:
+                    pixel_x_hits.append(self.p_col[k])
 
             if (pixel_x_hits == prev_pixel_xhits):
                 # another track in the same event
@@ -221,8 +224,9 @@ class EudetData:
             prev_pixel_xhits = pixel_x_hits
 
             for j in range(len(self.p_row)) :
-                self.hit_map[self.p_col[j]][self.p_row[j]] += 1
-                histo_hitpixel.Fill(self.p_col[j],self.p_row[j])
+                if self.p_iden[j] == dut:
+                    self.hit_map[self.p_col[j]][self.p_row[j]] += 1
+                    histo_hitpixel.Fill(self.p_col[j],self.p_row[j])
 
         # loop through hitmap
         # fill freq map with hits / nevents
@@ -236,7 +240,7 @@ class EudetData:
 
                 # if freq > threshold, make a hotpixel
                 if(self.frequency_map[i][j] > threshold):
-                    histo_hotpixel.Fill(i,j,self.frequency_map[i][j]) 
+                    histo_hotpixel.Fill(i,j,self.frequency_map[i][j])
                     self.hotpixels.append([i,j])
 
         f = open(filename,'w')
@@ -271,7 +275,7 @@ class EudetData:
         self.t_nTrackParams = self.TrackTree.nTrackParams
         self.t_euEv= self.TrackTree.euEvt
         self.t_posX = self.TrackTree.xPos
-        self.t_posY= self.TrackTree.yPos 
+        self.t_posY= self.TrackTree.yPos
         self.t_dxdz= self.TrackTree.dxdz
         self.t_dydz= self.TrackTree.dydz
         self.t_iden= self.TrackTree.iden
@@ -312,27 +316,27 @@ class EudetData:
         else:
             for tot,col,row in zip(self.p_tot,self.p_col,self.p_row) :
                 self.p_energyGC.append(0.)
-                self.p_energyPbPC.append(0.)      
+                self.p_energyPbPC.append(0.)
 
  #       for index,totvalue in enumerate(self.p_tot) :
  #           self.p_tot[index]=float(totvalue)/self.scale
- 
- 
-    def PlotFrame(self,i,c,n_pix_min=0) : 
-        
-	plot = TH2D("frame %i" %i, "frame %i" %i, npix_X, 0, npix_X, npix_Y, 0, npix_Y)
-	self.getEvent(i)
-	
-	if(len(self.p_col) > n_pix_min):
-	    for j in xrange(len(self.p_col)) : 
+
+
+    def PlotFrame(self,i,c,n_pix_min=0) :
+
+        plot = TH2D("frame %i" %i, "frame %i" %i, npix_X, 0, npix_X, npix_Y, 0, npix_Y)
+        self.getEvent(i)
+
+        if(len(self.p_col) > n_pix_min):
+            for j in xrange(len(self.p_col)) :
                 plot.Fill(self.p_col[j],self.p_row[j],self.p_tot[j])
-	
+
             plot.Draw("colz")
             c.Update()
-	    print "press enter for next frame, ctrl-D to exit"
-	    a=raw_input()
-	else : 
-	    print "Skipping event %i, does not have more than minimum number of hits (%i)" %(i,n_pix_min)
+            print "press enter for next frame, ctrl-D to exit"
+            a=raw_input()
+        else :
+            print "Skipping event %i, does not have more than minimum number of hits (%i)" %(i,n_pix_min)
 
     def WriteReconstructedData(self,filename,dut=6) :
         outfile = TFile(filename,'recreate')
@@ -572,8 +576,8 @@ class EudetData:
             for cluster in clusters :
 
                 if(len(cluster.col)<maxn) :
-		
-	   	    for i in range(len(cluster.col)) :
+
+                    for i in range(len(cluster.col)) :
                         col[i]=cluster.col[i]
                     for i in range(len(cluster.row)) :
                         row[i]=cluster.row[i]
@@ -583,9 +587,9 @@ class EudetData:
                         energyGC[i]=cluster.energyGC[i]
                     for i in range(len(cluster.energyPbPC)) :
                         energyPbPC[i]=cluster.energyPbPC[i]
-			
-		else : 
-	   	    for i in range(maxn) :
+
+                else :
+                    for i in range(maxn) :
                         col[i]=cluster.col[i]
                     for i in range(maxn) :
                         row[i]=cluster.row[i]
@@ -595,7 +599,7 @@ class EudetData:
                         energyGC[i]=cluster.energyGC[i]
                     for i in range(maxn) :
                         energyPbPC[i]=cluster.energyPbPC[i]
-					
+
 
                 sizeX[0]=cluster.sizeX
                 sizeY[0]=cluster.sizeY
@@ -637,20 +641,13 @@ class EudetData:
 
     def IsInEdges(self,track,dut=6):
         is_in = False
-        
-	if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X+self.edge) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y+self.edge)):
+
+        if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X+self.edge) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y+self.edge)):
             is_in = True
             if(fabs(track.trackX[track.iden.index(dut)])<=(halfChip_X) and fabs(track.trackY[track.iden.index(dut)])<=(halfChip_Y)):
                 is_in=False
         return is_in
 
-
-    def IsInGoodRegion(self,track,dut=6) : 
-    
-        if (track.trackX[track.iden.index(dut)]>=((pitchX*npix_X)/2-4*pitchX) and track.trackX[track.iden.index(dut)]<=((pitchX*npix_X)/2)) and (track.trackY[track.iden.index(dut)]>=(-(pitchY*npix_Y)/2.) and track.trackY[track.iden.index(dut)]<=((pitchY*npix_Y)/2.)) :
- 	    return true
-	else : 
-	    return false
 
     def ComputeResiduals(self,i,dut=6) :
 
@@ -708,7 +705,7 @@ class EudetData:
         print "#######################################################"
 
 
-    def GetTrack(self,i) :
+    def GetTrack(self,i,dut=6) :
 
         self.getEvent(i)
         posX_tmp = []
@@ -723,7 +720,9 @@ class EudetData:
 
 
         tracks = []
-
+        ndut = len(set(self.t_iden))
+        #print self.t_iden, set(self.t_iden), len(set(self.t_iden))
+        
         #--------------------- self.t_nTrackParams = self.TrackTree.nTrackParams
         #------------------------------------- self.t_euEv= self.TrackTree.euEvt
         #------------------------------------- self.t_posX = self.TrackTree.xPos
@@ -734,30 +733,26 @@ class EudetData:
         #------------------------------ self.t_trackNum= self.TrackTree.trackNum
         #-------------------------------------- self.t_chi2= self.TrackTree.chi2
         #------------------------------------- self.t_ndof = self.TrackTree.ndof
-
-        for data in self.t_posX :
-            posX_tmp.append(data)
-        for data in self.t_posY :
-            posY_tmp.append(data)
-        for data in self.t_iden :
-            iden_tmp.append(data)
-        for data in self.t_dxdz :
-            dxdz_tmp.append(data)
-        for data in self.t_dydz :
-            dydz_tmp.append(data)
-        for data in self.t_chi2 :
-            chi2_tmp.append(data)
-        for data in self.t_ndof :
-            ndof_tmp.append(data)
-        for data in self.t_trackNum :
-            trackNum_tmp.append(data)
+        
+        for k in range(len(self.t_posX)):
+            if self.t_iden[k] == dut:
+                posX_tmp.append(self.t_posX[k])
+                posY_tmp.append(self.t_posY[k])
+                iden_tmp.append(self.t_iden[k])
+                dxdz_tmp.append(self.t_dxdz[k])
+                dydz_tmp.append(self.t_dydz[k])
+                chi2_tmp.append(self.t_chi2[k])
+                ndof_tmp.append(self.t_ndof[k])
+                trackNum_tmp.append(self.t_trackNum[k])
 
         nTrackParams_tmp=self.t_nTrackParams
+        #print posX_tmp, iden_tmp, chi2_tmp, nTrackParams_tmp, trackNum_tmp, len(self.t_iden)
+
 
         if len(trackNum_tmp)>0 :
             for j in range(max(trackNum_tmp)+1) :
                 aTrack = Track()
-                ndata = nTrackParams_tmp/(max(trackNum_tmp)+1)
+                ndata = nTrackParams_tmp/(ndut*(max(trackNum_tmp)+1))
                 #print "nTrackParam : %i len(trackNum %i)"%(nTrackParams_tmp,max(trackNum_tmp)+1)
                 aTrack.trackX = posX_tmp[j*ndata:j*ndata+ndata]
                 aTrack.trackY = posY_tmp[j*ndata:j*ndata+ndata]
@@ -766,12 +761,12 @@ class EudetData:
                     aTrack.trackX[index] = aTrack.trackX[index]-npix_X*pitchX/2.-pitchX/2.
                     aTrack.trackY[index] = aTrack.trackY[index]-npix_Y*pitchY/2.-pitchY/2.
                 aTrack.iden = iden_tmp[j*ndata:j*ndata+ndata]
+                #print "j*ndata", j*ndata, "j*ndata+ndata", j*ndata+ndata
                 aTrack.chi2 = chi2_tmp[j*ndata:j*ndata+ndata]
                 aTrack.trackNum = trackNum_tmp[j*ndata:j*ndata+ndata]
                 aTrack.ndof = ndof_tmp[j*ndata:j*ndata+ndata]
                 aTrack.dxdz = dxdz_tmp[j*ndata:j*ndata+ndata]
                 aTrack.dydz = dydz_tmp[j*ndata:j*ndata+ndata]
-
                 if(aTrack.chi2[0]<self.Chi2_Cut):
                     tracks.append(aTrack)
 
@@ -795,11 +790,11 @@ class EudetData:
         # clusters are matched to tracks using GetPixelResiduals
         # r_max: maximum radial distance allowed between track and any pixel of the cluster
 
-        try : 
-		clusters_tmp = self.AllClusters[i]
-        except: 
-		clusters_tmp = []
-	matched_clusters = []
+        try :
+            clusters_tmp = self.AllClusters[i]
+        except:
+            clusters_tmp = []
+        matched_clusters = []
         good_count = 0
 
         for track in self.AllTracks[i] :
@@ -840,7 +835,7 @@ class EudetData:
 
         if(filter_cluster) :
             if(i<len(self.AllClusters)):
-	    	self.AllClusters[i] = matched_clusters
+                self.AllClusters[i] = matched_clusters
         else :
             self.AllClusters[i] = clusters_tmp
 
@@ -931,9 +926,9 @@ class EudetData:
 
     def ComputePosition(self,i,method="QWeighted",sigma=0.003,sigmaGC=0.003,sigmaPbPC=0.003):
 
-        
-	if(i<len(self.AllClusters)):
-    	    for cluster in self.AllClusters[i] :
+
+        if(i<len(self.AllClusters)):
+            for cluster in self.AllClusters[i] :
                 cluster.Statistics()
                 if (method=="QWeighted"):
                     cluster.GetQWeightedCentroid()
@@ -946,31 +941,40 @@ class EudetData:
 
 
 
-    def ClusterEvent(self,i,method="QWeighted",sigma=0.003,sigmaGC=0.003,sigmaPbPC=0.003):
+    def ClusterEvent(self,i,method="QWeighted",sigma=0.003,sigmaGC=0.003,sigmaPbPC=0.003,dut=6):
 
         self.getEvent(i)
+        
+        row_tmp = []
+        col_tmp = []
+        tot_tmp = []
+        energyGC_tmp = []
+        energyPbPC_tmp = []
 
-        row_tmp = [s for s in self.p_row]
-        col_tmp = [s for s in self.p_col]
-        tot_tmp = [s for s in self.p_tot]
-        energyGC_tmp = [s for s in self.p_energyGC]
-        energyPbPC_tmp = [s for s in self.p_energyPbPC]
+        npixels_hit = len(self.p_col)
+        for k in xrange(npixels_hit):
+            if self.p_iden[k] == dut:
+                row_tmp.append(self.p_row[k])
+                col_tmp.append(self.p_col[k])
+                tot_tmp.append(self.p_tot[k])
+                energyGC_tmp.append(self.p_energyGC[k])
+                energyPbPC_tmp.append(self.p_energyPbPC[k])
 
         # ------------------------------------------------------------------------------------#
         # Temporary solution for pixels hit several times. Include TOA in the future analysis
         # ------------------------------------------------------------------------------------#
-        if (SensorType=="Timepix3" or SensorType=="CLICpix"):
+        if (SensorType=="Timepix3" or SensorType=="CLICpix" or SensorType=="FEI4"):
             indexPixelsToRemove=[]
             for index in range(0, len(row_tmp)):
                 row_temp=row_tmp[index]
-                col_temp=col_tmp[index]            
+                col_temp=col_tmp[index]
                 for index2 in range(index+1, len(row_tmp)):
                     if(row_temp==row_tmp[index2] and col_temp==col_tmp[index2]):
                         indexPixelsToRemove.append(index)
                         indexPixelsToRemove.append(index2)
 
             row_tmp=[ row_tmp[k] for k in range(0, len(row_tmp)) if k not in indexPixelsToRemove ]
-            col_tmp=[ col_tmp[k] for k in range(0, len(col_tmp)) if k not in indexPixelsToRemove ]   
+            col_tmp=[ col_tmp[k] for k in range(0, len(col_tmp)) if k not in indexPixelsToRemove ]
             tot_tmp=[ tot_tmp[k] for k in range(0, len(tot_tmp)) if k not in indexPixelsToRemove ]
             energyGC_tmp=[ energyGC_tmp[k] for k in range(0,len(energyGC_tmp)) if k not in indexPixelsToRemove ]
             energyPbPC_tmp=[ energyPbPC_tmp[k] for k in range(0,len(energyPbPC_tmp)) if k not in indexPixelsToRemove ]
@@ -991,9 +995,9 @@ class EudetData:
 
         # set a maximum number of hit pixels to be clustered (skips large events)
         if len(col_tmp) < 5000:
-            try : 
+            try :
                 clusters = self.SciPyClustering(col_tmp,row_tmp,tot_tmp,energyGC_tmp,energyPbPC_tmp)
-            except : 
+            except :
                 clusters=[]
         else:
             print "Event", i, "not beng clustered,", len(col_tmp), "hit pixels"
@@ -1001,8 +1005,8 @@ class EudetData:
 
 
         for cluster in clusters :
-            cluster.Statistics()	
-	
+            cluster.Statistics()
+
         clusters = [cluster for cluster in clusters if cluster.totalTOT>0]
         clusterid = 0
 
@@ -1020,7 +1024,7 @@ class EudetData:
             clusterid+=1
             cluster=0
 
-	
+
         self.AllClusters.append(clusters)
         del clusters
 
@@ -1037,9 +1041,9 @@ class EudetData:
             if(len(pixels)==1):
                 c=Cluster()
                 c.addPixel(col[0],row[0],tot[0],energyGC[0],energyPbPC[0])
-                clusters=[c]        
-	
-	return clusters
+                clusters=[c]
+
+        return clusters
 
     def RecursiveClustering(self,row,col,tot) :
         clusters = []
