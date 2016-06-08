@@ -48,10 +48,10 @@ else :
     parser.print_help()
     exit()
 
-if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix"):
+if(("Timepix" in options.SENSOR) or options.SENSOR=="CLICpix" or options.options.SENSOR=="FEI4"):
     future_builtins.SensorType=options.SENSOR
 else :
-    print "Please provide known sensor name. Timepix/Timepix3 (default) or CLICpix"
+    print "Please provide known sensor name. Timepix/Timepix3 (default), CLICpix or FEI4"
     parser.print_help()
     exit()
 
