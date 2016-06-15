@@ -57,6 +57,7 @@ if os.path.isfile(infilename):
 
 	###create arrays for pixel branch
 	p_NHits = array('i',[0])
+	p_euEvt = array('i',[0])
 	p_PixX = array('i',[0]*nmaxhits)
 	p_PixY = array('i',[0]*nmaxhits)
 	p_Value = array('i',[0]*nmaxhits)
@@ -65,6 +66,8 @@ if os.path.isfile(infilename):
 
 	##create arrays for track branch
 	t_NTracks = array('i',[0])
+	t_nTrackParams = array('i',[0])
+	t_euEvt = array('i',[0])
 	t_SlopeX = array('d',[0]*nmaxhits)
 	t_SlopeY = array('d',[0]*nmaxhits)
 	t_OriginX = array('d',[0]*nmaxhits)
@@ -72,9 +75,11 @@ if os.path.isfile(infilename):
 	t_trackNum = array('i',[0]*nmaxhits)
 	t_Planes = array('i',[0]*nmaxhits)
 	t_Chi2 = array('d',[0]*nmaxhits)
+	t_ndof = array('i',[1]*nmaxhits)
 
 	##pixel tree
 	nPixHits = pixelTree.Branch("nPixHits", p_NHits, "nPixHits/I")
+	euEvt = pixelTree.Branch("euEvt", p_euEvt, "euEvt/I")
 	col = pixelTree.Branch("col", p_PixX, "col[nPixHits]/I")
 	row = pixelTree.Branch("row", p_PixY, "row[nPixHits]/I")
 	tot = pixelTree.Branch("tot", p_Value, "tot[nPixHits]/I")
@@ -83,13 +88,16 @@ if os.path.isfile(infilename):
 
 	##track tree, need an integer NTracks to define the size of arrays
 	NTracks = trackTree.Branch("NTracks", t_NTracks, "NTracks/I")
+	nTrackParams = trackTree.Branch("nTrackParams", t_nTrackParams, "nTrackParams/I")
+	euEvt = trackTree.Branch("euEvt", t_euEvt, "euEvt/I")
 	xPos = trackTree.Branch("xPos", t_OriginX, "xPos[NTracks]/D")
 	yPos = trackTree.Branch("yPos", t_OriginY, "yPos[NTracks]/D")
 	dxdz = trackTree.Branch("dxdz", t_SlopeX, "dxdz[NTracks]/D")
 	dydz = trackTree.Branch("dydz", t_SlopeY, "dydz[NTracks]/D")
 	trackNum = trackTree.Branch("trackNum", t_trackNum, "trackNum[NTracks]/I")
-	t_iden = trackTree.Branch("t_iden", t_Planes, "iden[NTracks]/I")
+	t_iden = trackTree.Branch("iden", t_Planes, "iden[NTracks]/I")
 	chi2 = trackTree.Branch("chi2", t_Chi2, "chi2[NTracks]/D")
+	ndof = trackTree.Branch("ndof", t_ndof, "ndof[NTracks]/I")
 
 	tmpPixelTrees={}
 	tmpTrackTrees={}
@@ -128,7 +136,7 @@ if os.path.isfile(infilename):
 				p_PixY[j] = tmpTree.PixY[j-p_NHits[0]]
 				p_Value[j] = tmpTree.Value[j-p_NHits[0]]
 				p_Timing[j] = tmpTree.Timing[j-p_NHits[0]]
-				p_Planes[j] = int(key[5:])
+				p_Planes[j] = int(key[5:]) ##iden
 
 			##number of hits per event, sum over all planes
 			p_NHits[0] = p_NHits[0] + tmpTree.NHits
@@ -140,7 +148,24 @@ if os.path.isfile(infilename):
 	for i in range(t_nEntries): ##loop over tracks
 		if (i%10000 == 0):
 			print("Reading track event "+str(i))
-			
+###		
+#		tmpTrackTrees["Tracks"].GetEntry(i)
+#		NIntercepts=0
+#		for iTrack in range (tmpTrackTrees["Tracks"].NTracks):
+#			for key, tmpTree in tmpTrackTrees.iteritems():
+#				if "Tracks" in key:
+#					continue
+				#iden=key[5:]
+				#tmpTree.GetEntry(i)
+				#for j in range(tmpTree.NIntercepts):
+					#t_NTracks[0] = tmpTree.NTracks
+					#t_SlopeX[iTrack] = tmpTree.SlopeX[j]
+					#t_SlopeY[iTrack] = tmpTree.SlopeY[j]
+					#t_Chi2[iTrack] = tmpTree.Chi2[j]
+				#print key
+				
+				#t_trackNum
+	####		
 		for key, tmpTree in tmpTrackTrees.iteritems():
 			tmpTree.GetEntry(i)
 			if "Tracks" in key: ##track tree
@@ -150,11 +175,13 @@ if os.path.isfile(infilename):
 					t_SlopeY[j] = tmpTree.SlopeY[j]
 					t_Chi2[j] = tmpTree.Chi2[j]
 			elif "Plane" in key: ## planes
+				print key
 				for j in range(tmpTree.NIntercepts): ##loop over intercepts
 					t_OriginX[j] = tmpTree.interceptX[j]
 					t_OriginY[j] = tmpTree.interceptY[j]
 					t_trackNum[j] = tmpTree.NIntercepts ##???
-					t_Planes[j] = int(key[5:])
+					t_Planes[j] = int(key[5:]) ##iden
+					
 		trackTree.Fill()
 	
 	outfile.cd()
@@ -171,4 +198,4 @@ else:
 	exit()
 
 
-print "execution time: ", datetime.now() - startTime
+print "Wall time: ", datetime.now() - startTime
