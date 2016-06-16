@@ -6,6 +6,9 @@ import os
 import optparse
 from array import array
 
+#debug
+#from sys import stdin
+
 
 parser = optparse.OptionParser()
 
@@ -49,7 +52,7 @@ if os.path.isfile(infilename):
 	pixelTree = TTree("zspix", "zspix")
 	trackTree = TTree("eutracks", "eutracks")
 	
-	nmaxhits = 2000 ##limit for max number of hits per event
+	nmaxhits = 1000 ##limit for max number of hits per event
 	p_nEntries = infile.Get("Plane0").Get("Hits").GetEntriesFast()
 	t_nEntries = infile.Get("Tracks").GetEntriesFast()
 	
@@ -70,11 +73,11 @@ if os.path.isfile(infilename):
 	t_euEvt = array('i',[0])
 	t_SlopeX = array('d',[0]*nmaxhits)
 	t_SlopeY = array('d',[0]*nmaxhits)
-	t_OriginX = array('d',[0]*nmaxhits)
-	t_OriginY = array('d',[0]*nmaxhits)
+	t_PosX = array('d',[0]*nmaxhits)
+	t_PosY = array('d',[0]*nmaxhits)
 	t_trackNum = array('i',[0]*nmaxhits)
 	t_Planes = array('i',[0]*nmaxhits)
-	t_Chi2 = array('d',[0]*nmaxhits)
+	t_Chi2 = array('d',[1]*nmaxhits)
 	t_ndof = array('i',[1]*nmaxhits)
 
 	##pixel tree
@@ -90,14 +93,14 @@ if os.path.isfile(infilename):
 	NTracks = trackTree.Branch("NTracks", t_NTracks, "NTracks/I")
 	nTrackParams = trackTree.Branch("nTrackParams", t_nTrackParams, "nTrackParams/I")
 	euEvt = trackTree.Branch("euEvt", t_euEvt, "euEvt/I")
-	xPos = trackTree.Branch("xPos", t_OriginX, "xPos[NTracks]/D")
-	yPos = trackTree.Branch("yPos", t_OriginY, "yPos[NTracks]/D")
-	dxdz = trackTree.Branch("dxdz", t_SlopeX, "dxdz[NTracks]/D")
-	dydz = trackTree.Branch("dydz", t_SlopeY, "dydz[NTracks]/D")
-	trackNum = trackTree.Branch("trackNum", t_trackNum, "trackNum[NTracks]/I")
-	t_iden = trackTree.Branch("iden", t_Planes, "iden[NTracks]/I")
-	chi2 = trackTree.Branch("chi2", t_Chi2, "chi2[NTracks]/D")
-	ndof = trackTree.Branch("ndof", t_ndof, "ndof[NTracks]/I")
+	xPos = trackTree.Branch("xPos", t_PosX, "xPos[nTrackParams]/D")
+	yPos = trackTree.Branch("yPos", t_PosY, "yPos[nTrackParams]/D")
+	dxdz = trackTree.Branch("dxdz", t_SlopeX, "dxdz[nTrackParams]/D")
+	dydz = trackTree.Branch("dydz", t_SlopeY, "dydz[nTrackParams]/D")
+	trackNum = trackTree.Branch("trackNum", t_trackNum, "trackNum[nTrackParams]/I")
+	t_iden = trackTree.Branch("iden", t_Planes, "iden[nTrackParams]/I")
+	chi2 = trackTree.Branch("chi2", t_Chi2, "chi2[nTrackParams]/D")
+	ndof = trackTree.Branch("ndof", t_ndof, "ndof[nTrackParams]/I")
 
 	tmpPixelTrees={}
 	tmpTrackTrees={}
@@ -123,6 +126,8 @@ if os.path.isfile(infilename):
 	for i in range(p_nEntries): ##loop over events
 		if (i%10000 == 0):
 			print("Reading pixel event "+str(i))
+		if i > 20000:
+			break
 		p_NHits[0] = 0
 
 		for key, tmpTree in tmpPixelTrees.iteritems():
@@ -130,8 +135,10 @@ if os.path.isfile(infilename):
 			#tmpTree.Print()
 			tmpTree.GetEntry(i)
 			for j in range(p_NHits[0],p_NHits[0]+tmpTree.NHits): ##loop over hits
-				#print j, NHits[0]
-				#p_NHits[0] is cumulativ, len(tmpTree.PixX) >= NHits[0]
+				#if j > 100:
+					#print "event ", i, " hit ", j, " plane ", int(key[5:]), tmpTree.NHits
+				#p_NHits[0] is total hits per event for all planes, each hit has an iden
+				#p_NHits[0] is therefore cumulativ, len(tmpTree.PixX) >= NHits[0]
 				p_PixX[j] = tmpTree.PixX[j-p_NHits[0]]
 				p_PixY[j] = tmpTree.PixY[j-p_NHits[0]]
 				p_Value[j] = tmpTree.Value[j-p_NHits[0]]
@@ -142,47 +149,79 @@ if os.path.isfile(infilename):
 			p_NHits[0] = p_NHits[0] + tmpTree.NHits
 	
 		pixelTree.Fill()
-	#pixelTree.Print()
 	
 	##### TRACK TREE LOOP
 	for i in range(t_nEntries): ##loop over tracks
 		if (i%10000 == 0):
 			print("Reading track event "+str(i))
-###		
-#		tmpTrackTrees["Tracks"].GetEntry(i)
-#		NIntercepts=0
-#		for iTrack in range (tmpTrackTrees["Tracks"].NTracks):
-#			for key, tmpTree in tmpTrackTrees.iteritems():
-#				if "Tracks" in key:
-#					continue
-				#iden=key[5:]
-				#tmpTree.GetEntry(i)
-				#for j in range(tmpTree.NIntercepts):
-					#t_NTracks[0] = tmpTree.NTracks
-					#t_SlopeX[iTrack] = tmpTree.SlopeX[j]
-					#t_SlopeY[iTrack] = tmpTree.SlopeY[j]
-					#t_Chi2[iTrack] = tmpTree.Chi2[j]
-				#print key
+		if i > 20000:
+			break
+
+		tmpTrackTrees["Tracks"].GetEntry(i)
+		
+		t_NTracks[0]=tmpTrackTrees["Tracks"].NTracks
+		t_euEvt[0]=i
+
+	
+		iEventEl=0
+		for key, interceptTree in tmpTrackTrees.iteritems():
+			if "Tracks" in key:  # only intercept trees
+				continue
+			
+			iden=int(key[5:])
+			
+			interceptTree.GetEntry(i)
+			if interceptTree.NIntercepts != t_NTracks[0]:
+				raise ValueError("mismatch between tracks and intercepts for event "+str(i))
+			
+			for iTrack in range (t_NTracks[0]):
+				t_trackNum[iEventEl] = iTrack
+				t_Planes[iEventEl] = iden
+
+				t_SlopeX[iEventEl] = tmpTrackTrees["Tracks"].SlopeX[iTrack]
+				t_SlopeY[iEventEl] = tmpTrackTrees["Tracks"].SlopeY[iTrack]
+				t_Chi2[iEventEl] = tmpTrackTrees["Tracks"].Chi2[iTrack]
+				t_ndof[iEventEl] = 1
 				
-				#t_trackNum
-	####		
-		for key, tmpTree in tmpTrackTrees.iteritems():
-			tmpTree.GetEntry(i)
-			if "Tracks" in key: ##track tree
-				for j in range(tmpTree.NTracks):
-					t_NTracks[0] = tmpTree.NTracks
-					t_SlopeX[j] = tmpTree.SlopeX[j]
-					t_SlopeY[j] = tmpTree.SlopeY[j]
-					t_Chi2[j] = tmpTree.Chi2[j]
-			elif "Plane" in key: ## planes
-				print key
-				for j in range(tmpTree.NIntercepts): ##loop over intercepts
-					t_OriginX[j] = tmpTree.interceptX[j]
-					t_OriginY[j] = tmpTree.interceptY[j]
-					t_trackNum[j] = tmpTree.NIntercepts ##???
-					t_Planes[j] = int(key[5:]) ##iden
-					
+				sensorHalfX = 80 * 250 / 2
+				sensorHalfY = 336 * 50 / 2
+				t_PosX[iEventEl] = (interceptTree.interceptX[iTrack] - sensorHalfX) / 1e3
+				t_PosY[iEventEl] = (interceptTree.interceptY[iTrack] - sensorHalfY) / 1e3
+				
+				iEventEl=iEventEl+1
+				
+		t_nTrackParams[0]=iEventEl
+		
+		#if iEventEl > 42:
+			#print t_euEvt, iEventEl
+		
+		#if iEventEl%6:
+			#print t_euEvt, t_Planes
+			
 		trackTree.Fill()
+
+
+		#for key, tmpTree in tmpTrackTrees.iteritems():
+			#tmpTree.GetEntry(i)
+			#if "Tracks" in key: ##track tree
+				#if tmpTree.NTracks != 1:
+					#print tmpTree.NTracks
+				#for j in range(tmpTree.NTracks):
+					#t_NTracks[0] = tmpTree.NTracks
+					#t_SlopeX[j] = tmpTree.SlopeX[j]
+					#t_SlopeY[j] = tmpTree.SlopeY[j]
+					#t_Chi2[j] = tmpTree.Chi2[j]
+			#elif "Plane" in key: ## planes
+				#if tmpTree.NIntercepts != 1:
+					#print key, tmpTree.NIntercepts
+				#for j in range(tmpTree.NIntercepts): ##loop over intercepts
+					
+					#t_OriginX[j] = tmpTree.interceptX[j]
+					#t_OriginY[j] = tmpTree.interceptY[j]
+					#t_trackNum[j] = tmpTree.NIntercepts ##???
+					#t_Planes[j] = int(key[5:]) ##iden
+					
+		#trackTree.Fill()
 	
 	outfile.cd()
 	trackTree.Write()
