@@ -919,7 +919,7 @@ def PerformPreAlignment(aDataSet,nevents,skip=1,filename='Alignment.txt',dut=6,R
 
 def PerformAlignement(aDataSet,nevent,skip,max_matched_dist=0.1,filename='Alignment.txt', dut=6) :
     x0 = np.array([0.,0.,0.]) # [zrot, xtrans, ytrans]
-    argTuple = aDataSet,nevent,skip
+    argTuple = aDataSet,nevent,skip,dut
     res = minimize(TotalDistanceFunction,x0,argTuple,method='Nelder-Mead',options={'xtol': 1e-5,'disp': True})
     return [0.,0.,res.x[0]],[res.x[1],res.x[2]]
 
