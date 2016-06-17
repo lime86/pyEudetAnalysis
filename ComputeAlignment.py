@@ -146,7 +146,8 @@ clusters_tmp = []
 last_time=time.time()
 
 # Load hot pixels
-hotpixel_filename = "%s/Run%i/HotPixels_%i_%i_%0.2f.txt" %(PlotPath,RunNumber,RunNumber,dutID,hotpixel_threshold)
+#hotpixel_filename = "%s/Run%i/HotPixels_%i_%i_%0.2f.txt" %(PlotPath,RunNumber,RunNumber,dutID,hotpixel_threshold)
+hotpixel_filename = "%s/Run%i/HotPixels_%i_%i_0.01.txt" %(PlotPath,RunNumber,RunNumber,dutID)
 print "Hotpixel filename:", hotpixel_filename
 if os.path.isfile(hotpixel_filename):
     aDataSet.LoadHotPixel(hotpixel_filename)

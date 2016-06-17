@@ -12,9 +12,9 @@ from array import array
 
 parser = optparse.OptionParser()
 
-parser.add_option('-i', '--input', default=".", help="Input directory.")
-parser.add_option('-o', '--output', default=".", help="Output directory.")
-parser.add_option('-f', '--infile', help="Input file name.")
+parser.add_option('-i', '--indir', default=".", help="indir directory.")
+parser.add_option('-o', '--outdir', default=".", help="outdir directory.")
+parser.add_option('-f', '--infile', help="indir file name.")
 
 (options, args) = parser.parse_args()
 
@@ -28,13 +28,13 @@ if options.infile is None:
 	exit()
 else:
 
-	if not options.input.endswith('/'):
-		options.input = options.input+'/'
+	if not options.indir.endswith('/'):
+		options.indir = options.indir+'/'
 		
-	if not options.output.endswith('/'):
-		options.output = options.output+'/'
+	if not options.outdir.endswith('/'):
+		options.outdir = options.outdir+'/'
 		
-	infilename = options.input+options.infile
+	infilename = options.indir+options.infile
 	
 	if not infilename.endswith(".root"):
 		infilename = infilename + ".root"
@@ -45,7 +45,7 @@ if os.path.isfile(infilename):
 	runnumber = infilename.split(".root")[0][-6:]
 	#print runnumber
 	
-	outfilename = options.output+"tbtrackrun"+runnumber+".root"
+	outfilename = options.outdir+"tbtrackrun"+runnumber+".root"
 	infile = TFile(infilename,'r')
 	outfile = TFile(outfilename,"recreate")
 	
@@ -78,8 +78,13 @@ if os.path.isfile(infilename):
 	t_trackNum = array('i',[0]*nmaxhits)
 	t_Planes = array('i',[0]*nmaxhits)
 	t_Chi2 = array('d',[1]*nmaxhits)
-	t_ndof = array('i',[1]*nmaxhits)
-
+	if "ref" in infilename:
+		t_ndof = array('i',[8]*nmaxhits)
+	elif "dut" in infilename:
+		t_ndof = array('i',[10]*nmaxhits)
+	else:
+		t_ndof = array('i',[1]*nmaxhits)
+		
 	##pixel tree
 	nPixHits = pixelTree.Branch("nPixHits", p_NHits, "nPixHits/I")
 	euEvt = pixelTree.Branch("euEvt", p_euEvt, "euEvt/I")
