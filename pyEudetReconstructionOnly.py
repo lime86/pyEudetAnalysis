@@ -39,7 +39,9 @@ parser.add_option("-i", "--dut ID",
 
 parser.add_option("-b", "--assembly",
                   help="Assembly name", dest="ASSEMBLY", default="AssemblyNotDefined")
-parser.add_option("-B", "--batch", dest="BATCH", help="Batch", action="store_true", default=False)
+                  
+parser.add_option("-B", "--batch",
+                  help="Batch", dest="BATCH", action="store_true", default=False)
 
 (options, args) = parser.parse_args()
 

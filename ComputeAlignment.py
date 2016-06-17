@@ -35,7 +35,9 @@ parser.add_option("-i", "--dut ID",
 
 parser.add_option("-b", "--assembly",
                   help="Assembly name", dest="ASSEMBLY", default="AssemblyNotDefined")
-parser.add_option("-B", "--batch", dest="BATCH", help="Batch", action="store_true", default=False)
+                  
+parser.add_option("-B", "--batch",
+                  help="Batch", dest="BATCH", action="store_true", default=False)
 (options, args) = parser.parse_args()
 
 if(options.RUN) :
@@ -144,7 +146,7 @@ clusters_tmp = []
 last_time=time.time()
 
 # Load hot pixels
-hotpixel_filename = "%s/Run%i/HotPixels_%i_%i_0.01.txt" %(PlotPath,RunNumber,RunNumber,dutID)
+hotpixel_filename = "%s/Run%i/HotPixels_%i_%i_%0.2f.txt" %(PlotPath,RunNumber,RunNumber,dutID,hotpixel_threshold)
 print "Hotpixel filename:", hotpixel_filename
 if os.path.isfile(hotpixel_filename):
     aDataSet.LoadHotPixel(hotpixel_filename)
