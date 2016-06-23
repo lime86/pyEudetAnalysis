@@ -131,8 +131,8 @@ if os.path.isfile(infilename):
 	for i in range(p_nEntries): ##loop over events
 		if (i%10000 == 0):
 			print("Reading pixel event "+str(i))
-		if i > 20000:
-			break
+		#if i > 20000:
+			#break
 		p_NHits[0] = 0
 
 		for key, tmpTree in tmpPixelTrees.iteritems():
@@ -159,8 +159,8 @@ if os.path.isfile(infilename):
 	for i in range(t_nEntries): ##loop over tracks
 		if (i%10000 == 0):
 			print("Reading track event "+str(i))
-		if i > 20000:
-			break
+		#if i > 20000:
+			#break
 
 		tmpTrackTrees["Tracks"].GetEntry(i)
 		
@@ -188,10 +188,14 @@ if os.path.isfile(infilename):
 				t_Chi2[iEventEl] = tmpTrackTrees["Tracks"].Chi2[iTrack]
 				t_ndof[iEventEl] = 1
 				
-				sensorHalfX = 80 * 250 / 2
-				sensorHalfY = 336 * 50 / 2
-				t_PosX[iEventEl] = (interceptTree.interceptX[iTrack] - sensorHalfX) / 1e3
-				t_PosY[iEventEl] = (interceptTree.interceptY[iTrack] - sensorHalfY) / 1e3
+				#### for the first Judith version with intercept tree
+				#sensorHalfX = 80 * 250 / 2
+				#sensorHalfY = 336 * 50 / 2
+				#t_PosX[iEventEl] = (interceptTree.interceptX[iTrack] - sensorHalfX) / 1e3
+				#t_PosY[iEventEl] = (interceptTree.interceptY[iTrack] - sensorHalfY) / 1e3
+				
+				t_PosX[iEventEl] = interceptTree.interceptX[iTrack] / 1e3
+				t_PosY[iEventEl] = interceptTree.interceptY[iTrack] / 1e3
 				
 				iEventEl=iEventEl+1
 				
